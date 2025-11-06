@@ -12,3 +12,5 @@
 *.nicolas text eol=lf
 *.cor text eol=lf
 stations* text eol=lf
+*.tvel text eol=lf
+*_stalist text eol=lf

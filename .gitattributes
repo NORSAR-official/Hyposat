@@ -1,0 +1,14 @@
+*.dat text eol=lf
+*.DAT text eol=lf
+*.cor text eol=lf
+*.tbl text eol=lf
+*.hed text eol=lf
+*.grd text eol=lf
+*.vp  text eol=lf
+*.vs  text eol=lf
+*.TABLE text eol=lf
+*.bnds  text eol=lf
+*.wa  text eol=lf
+*.nicolas text eol=lf
+*.cor text eol=lf
+stations* text eol=lf

@@ -8,10 +8,10 @@ HYPOSAT version 6.2a2 and HYPOMOD version 2.2a main directory with following con
 ### Subdirectory ./bin/
 
 hyposat 
-	HYPOSAT-executable compiled for Linux (Centos 7)
+	HYPOSAT-executable compiled for Linux (Rocky 9)
 
 hypomod 
-	HYPOMOD-executable compiled for Linux (Centos 7)
+	HYPOMOD-executable compiled for Linux (Rocky 9)
 
 
 ### Subdirectory ./data/ 

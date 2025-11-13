@@ -3,7 +3,7 @@
 #                                                            #
 # Driver for Makefile for the programs HYPOSAT / HYPOMOD     #
 #                                                            #
-# July 2013, Johannes Schweitzer, NORSAR                     #
+# October 2013, Johannes Schweitzer, NORSAR                  #
 #                                                            #
 #  johannes@norsar.no                                        #
 #                                                            #
@@ -102,7 +102,7 @@ fi
 ## for optimizing
 #
 
-#	export OPT="-O3 -ftree-loop-distribution -floop-block -floop-strip-mine -floop-interchange"
+#	export OPT="-O3 -floop-block -floop-strip-mine"
  	export OPT="-O3"
 
 

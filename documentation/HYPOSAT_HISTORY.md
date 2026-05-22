@@ -508,3 +508,7 @@ e-mail: johannes.schweitzer@norsar.no
 ### Version 6.2b December 2025 
 
 	Amplitude phase names Amb, AMs & AML implemented.
+
+### Version 6.2b2 May 2026
+
+	T, IS and x phases added.

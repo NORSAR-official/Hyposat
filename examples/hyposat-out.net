@@ -1,19 +1,18 @@
-HYPOSAT Version 6.2a2
+HYPOSAT Version 6.3
 
 Event solution by HYPOSAT
 
 Scandinavia 1994-107:12.00.0
 
+Initial epicenter calculated from     6 backazimuth-observation pairs
 
 Parameters of initial solution (+/- 1 standard deviation):
-
-Mean epicenter calculated from    22 backazimuth observation pairs
-Mean epicenter lat:   66.954 +/-     0.994 [deg]
-Mean epicenter lon:   21.750 +/-     0.206 [deg]
+Epicenter lat:   66.898 +/-    0.051 [deg]
+Epicenter lon:   21.717 +/-    0.051 [deg]
 
 S-P Travel-time difference type 3 with   2 observation(s)
-   to=   766584015.6 +/-   2.1 [s] Vp/Vs= 1.80 +/- 0.04
-Mean source time:  766584015.596 +/-   2.149 [s]
+   to=   766584015.6 +/-   2.8 [s] Vp/Vs= 1.80 +/- 0.04
+Mean source time:  766584015.596 +/-   2.799 [s]
 Mean       vp/vs:          1.798 +/-   0.041
 
 Iterations        :    5
@@ -33,7 +32,7 @@ Epicenter lat:                 67.1372 +/-   0.1108 [deg]
 Epicenter lon:                 21.6455 +/-   0.3368 [deg]
 Source depth :                  0.00   [km] Fixed by HYPOSAT
 
-Source time corrected for mean travel-time residual (     0.580 [s])
+Source time corrected for mean travel-time residual (     0.581 [s])
 
 Source time  : 1994 04 17 12 00  7.119 +/-    2.796 [s]
         or               766584007.119 +/-    2.796 [s]
@@ -41,7 +40,7 @@ Source time  : 1994 04 17 12 00  7.119 +/-    2.796 [s]
 
 Epicenter uncertainty ellipse:
 Major half axis:    45.18 [km]  Minor half axis:     4.85 [km]
-Azimuth:      158.8  [deg] Area:         688.14 [km^2]
+Azimuth:      158.8  [deg] Area:         688.09 [km^2]
 
 Flinn-Engdahl Region ( 536 ): CENTRAL NORBOTTEN SWEDEN
 
@@ -53,7 +52,7 @@ ARCES   2.802  28.97 Sg               12 01 39.500  -0.270 207.10   -5.45 28.50 
 APA0    4.410  78.66 Pn               12 01 21.100   5.826 276.10    6.97 12.80  -0.95  ASD                                       _  45.82         
 APA0    4.410  78.66 S1      Sn       12 02 13.400   5.123 264.90   -4.23 20.60  -4.15 TA D                                       _  48.35         
 APA0    4.410  78.66 Lg               12 02 20.100  -3.938 249.40  -19.73 27.10  -3.95 T                                          _                
-FINES   6.032 159.31 Pn               12 01 39.200   1.223 344.60    1.30 15.00   1.25 TAS                                        _  45.80         
+FINES   6.032 159.31 Pn               12 01 39.200   1.224 344.60    1.30 15.00   1.25 TAS                                        _  45.80         
 NORES   7.805 219.40 Pn               12 01 57.800  -3.261  28.60   -1.72 13.40  -0.36 TAS                                        _  45.78         
 
 Defining travel-time differences:

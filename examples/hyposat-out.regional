@@ -1,24 +1,26 @@
-HYPOSAT Version 6.2a2
+HYPOSAT Version 6.3
 
 Event solution by HYPOSAT
 
 Lubin - Poland 1995-032:20.00
 
-No initial solution from multiple backazimuth observations possible.
+Initial epicenter estimated with   6 epicentral distance observations:
 
-Epicenter set from station GERES with backazimuth  31.5 [deg], delta  319.81 [km]
-Epicenter lat:   51.273 [deg]
-Epicenter lon:   16.096 [deg]
+Parameters of initial solution (+/- 1 standard deviation):
+Epicenter lat:   51.461 +/-    0.334 [deg]
+Epicenter lon:   15.704 +/-    0.536 [deg]
 
+S-P Travel-time difference type 1 with   1 observation(s)
+   to=   791668672.2 +/-  76.2 [s] Vp/Vs= 1.73 +/- 0.20
 S-P Travel-time difference type 2 with  15 observation(s)
    to=   791668789.1 +/-   1.2 [s] Vp/Vs= 1.66 +/- 0.02
-S-P Travel-time difference type 3 with   7 observation(s)
-   to=   791668790.7 +/-   2.4 [s] Vp/Vs= 1.75 +/- 0.02
-Mean source time:  791668789.392 +/-   0.618 [s]
-Mean       vp/vs:          1.690 +/-   0.040
+S-P Travel-time difference type 3 with   8 observation(s)
+   to=   791668794.5 +/-  11.0 [s] Vp/Vs= 1.84 +/- 0.11
+Mean source time:  791668789.273 +/-   3.936 [s]
+Mean       vp/vs:          1.680 +/-   0.050
 
 Iterations        :    6
-Number of defining:  101
+Number of defining:  102
 Reference models  : CRUST 1.0 and ak135_A             
 CRUST 1.0 used for Station corrections
 CRUST 1.0 used for Reflection Point corrections
@@ -27,169 +29,169 @@ The new source parameters:
 
 Confidence level of given uncertainties:  95.00 %
 
-Source time  : 1995 02 01 19 59 51.272 +/-    0.248 [s]
-        or               791668791.272 +/-    0.248 [s]
-        or       1995-032:19.59.51.272 +/-    0.248 [s]
+Source time  : 1995 02 01 19 59 51.271 +/-    0.250 [s]
+        or               791668791.271 +/-    0.250 [s]
+        or       1995-032:19.59.51.271 +/-    0.250 [s]
 
-Epicenter lat:                 51.4884 +/-   0.0165 [deg]
-Epicenter lon:                 16.1582 +/-   0.0194 [deg]
+Epicenter lat:                 51.4875 +/-   0.0166 [deg]
+Epicenter lon:                 16.1578 +/-   0.0195 [deg]
 Source depth :                  1.00   [km] Fixed by input
 
-Source time corrected for mean travel-time residual (    -0.042 [s])
+Source time corrected for mean travel-time residual (    -0.049 [s])
 
-Source time  : 1995 02 01 19 59 51.230 +/-    0.248 [s]
-        or               791668791.230 +/-    0.248 [s]
-        or       1995-032:19.59.51.230 +/-    0.248 [s]
+Source time  : 1995 02 01 19 59 51.222 +/-    0.250 [s]
+        or               791668791.222 +/-    0.250 [s]
+        or       1995-032:19.59.51.222 +/-    0.250 [s]
 
 Epicenter uncertainty ellipse:
-Major half axis:     2.96 [km]  Minor half axis:     1.69 [km]
-Azimuth:        8.0  [deg] Area:          15.72 [km^2]
+Major half axis:     2.98 [km]  Minor half axis:     1.70 [km]
+Azimuth:        8.1  [deg] Area:          15.91 [km^2]
 
 Flinn-Engdahl Region ( 548 ): EASTERN PART OF WEST EUROPEAN PLATFORM
 
  Stat  Delta   Azi   Phase   [used]    Onset time    Res     Baz     Res   Rayp   Res  Used      SNR    Amplitude  Period  MAG    Q Em-Ang
 
-KSP     0.652 172.46 Pg               20 00  4.400   1.183                                D                                       _  89.21
-KSP     0.652 172.46 Sg               20 00 14.000   2.113                                D                                       _  89.21
-BRG     1.524 247.03 Pn               20 00 17.900  -1.180                                D                                       _  45.84
-BRG     1.524 247.03 Pg      Pn       20 00 19.600   0.520                             T  D                                       _  45.84
-BRG     1.524 247.03 Sg               20 00 40.100  -0.079                             T  D                                       _  89.60
-PRU     1.820 214.99 Pn               20 00 22.900  -0.731                             T  D                                       _  45.84
-PRU     1.820 214.99 Pg               20 00 24.900  -1.166                                D                                       _  89.39
-PRU     1.820 214.99 Px      sPg      20 00 28.600   1.362                                 R                                      _ 143.38
-PRU     1.820 214.99 Sn               20 00 42.100  -5.998                                                                        _  50.18
-PRU     1.820 214.99 Sg               20 00 49.200  -0.422                             T  D                                       _  89.39
-RAC     1.910 136.64 Pg               20 00 28.300   0.455                             T  D                                       _  89.33
-RAC     1.910 136.64 Sg               20 00 52.500  -0.139                             T  D                                       _  89.33
-CLL     1.985 266.00 Pn               20 00 24.300  -1.073                             T  D                                       _  45.84
-CLL     1.985 266.00 Pg               20 00 28.000  -1.348                                D                                       _  89.28
-CLL     1.985 266.00 Sg               20 00 54.500  -0.708                             T  D                                       _  89.28
-OKC     2.082 141.78 Pn               20 00 26.400  -0.457                             T  D                                       _  45.83
-OKC     2.082 141.78 Pg               20 00 30.700  -0.353                             T  D                                       _  89.21
-OKC     2.082 141.78 Sg               20 00 58.000   0.050                             T  D                                       _  89.21
-VRAC    2.201 172.56 Pn               20 00 29.700   0.918                             T  D                                       _  45.84
-VRAC    2.201 172.56 Sn      Sg       20 01  1.800  -0.187                             T  D                                       _  89.14
-OJC     2.634 117.42 Pn               20 00 33.000  -1.576                                D                                       _  45.84
-OJC     2.634 117.42 Pg               20 00 41.300  -0.523                             T  D                                       _  88.87
-OJC     2.634 117.42 Sn               20 01  4.900  -2.891                                D                                       _  50.18
-OJC     2.634 117.42 Sg               20 01 16.500   0.337                             T  D                                       _  88.87
-KHC     2.882 216.02 Pn               20 00 38.000  -0.259                             T  D                                       _  45.83
-KHC     2.882 216.02 Pg               20 00 44.000  -2.466                                D                                       _  88.73
-KHC     2.882 216.02 Sn               20 01 15.000   0.608                             T  D                                       _  50.17
-KHC     2.882 216.02 Sg               20 01 23.000  -0.859                             T  D                                       _  88.73
-KHC     2.882 216.02 Sx      SnSn     20 01 26.000  -0.118                                 R                                      _  50.18
-HOF     2.954 248.21 Pn               20 00 38.800   0.329                             T                                          _  45.84
-MOX     2.987 255.37 Pn               20 00 38.700  -0.177                             T  D                                       _  45.84
-MOX     2.987 255.37 Pg               20 00 47.600  -0.880                             T  D                                       _  88.67
-MOX     2.987 255.37 Sg               20 01 27.200  -0.037                             T  D                                       _  88.67
-GERES   3.082 211.78 Pn               20 00 40.700  -0.321  33.50    3.60 12.48  -1.27 TA                                         _  45.84
-GERES   3.082 211.78 Pg               20 00 48.000  -2.600  29.50   -0.40 16.34  -2.83  A D                                       _  88.62
-GERES   3.082 211.78 Sg               20 01 28.800  -2.230  31.50    1.60 25.84  -6.30  A D                                       _  88.62
-WET     3.151 223.12 Pn               20 00 42.000   0.394                             T                                          _  45.83
-VKA     3.229 178.10 Pn               20 00 43.600   0.444                             T                                          _  45.83
-VKA     3.229 178.10 Pg               20 00 51.000  -2.520                                D                                       _  88.54
-VKA     3.229 178.10 Sg               20 01 34.700  -1.286                                D                                       _  88.54
-ZST     3.352 169.13 Pg               20 00 52.200  -3.680                                                                        _  88.47
-ZST     3.352 169.13 Px      Pg       20 00 55.900   0.020                                                                        _  88.47
-ZST     3.352 169.13 Sx      SnSn     20 01 38.700   0.613                                 R                                      _  50.18
-ZST     3.352 169.13 Lg      SbSbSb   20 01 45.000   0.573                                                                        _  63.64
-GRB3    3.515 234.05 Pn               20 00 48.200   1.847                                                                        _  45.84
-GRB3    3.515 234.05 Pg               20 00 58.900   0.054                             T                                          _  88.39
-GRA3    3.533 242.60 Pn               20 00 47.100   0.529                             T  D                                       _  45.84
-GRA3    3.533 242.60 Pg               20 00 59.900   0.741                             T  D                                       _  88.38
-GRB1    3.563 235.67 Pn               20 00 47.700   0.698                             T  D                                       _  45.84
-GRB1    3.563 235.67 Pg               20 01  0.700   0.946                             T  D                                       _  88.36
-GRB1    3.563 235.67 Sg               20 01 46.400   0.073                             T  D                                       _  88.36
-GRB4    3.565 237.24 Pg               20 01  0.800   1.005                             T                                          _  88.36
-GRA2    3.567 240.90 Pn               20 00 47.800   0.733                             T                                          _  45.84
-GRA4    3.575 239.26 Pn               20 00 47.900   0.721                             T                                          _  45.84
-CLZ     3.619 277.89 Pn               20 00 48.800   0.500                             T  D                                       _  45.83
-CLZ     3.619 277.89 Sn               20 01 32.400  -0.251                             T  D                                       _  50.16
-GRF     3.623 242.16 Pn               20 00 47.100  -0.736                             T  D                                       _  45.84
-GRF     3.623 242.16 Px      pPn      20 00 48.300  -0.148                                 R                                      _ 134.16
-GRF     3.623 242.16 Pg               20 01  1.000   0.085                             T  D                                       _  88.33
-GRF     3.623 242.16 Sg               20 01 47.800  -0.475                             T  D                                       _  88.33
-GRB2    3.631 234.06 Pn               20 00 48.500   0.543                             T                                          _  45.84
-GRB2    3.631 234.06 Pg               20 00 59.600  -1.469                                                                        _  88.32
-GRB5    3.729 232.09 Pn               20 00 50.300   0.996                             T  D                                       _  45.84
-GRB5    3.729 232.09 Pg               20 01  2.700  -0.258                             T  D                                       _  88.27
-GRC4    3.821 232.81 Pn               20 00 52.100   1.554                                                                        _  45.84
-GRC4    3.821 232.81 Pg               20 01  4.000  -0.692                             T                                          _  88.22
-GRC1    3.883 231.82 Pn               20 00 52.400   0.931                             T  D                                       _  45.84
-GRC1    3.883 231.82 Pg               20 01  5.000  -0.884                             T  D                                       _  88.19
-GRC1    3.883 231.82 Sg               20 01 56.400  -0.201                             T  D                                       _  88.19
-GRC3    3.924 230.27 Pn               20 00 53.000   1.003                             T                                          _  45.83
-GRC3    3.924 230.27 Pg               20 01  5.900  -0.730                             T                                          _  88.17
-GRC2    4.041 231.38 Pg               20 01  7.000  -1.873                                                                        _  88.11
-BHG     4.332 210.76 Pn               20 01  0.900   2.117                                                                        _  45.83
-FUR     4.587 225.43 Pn               20 01  2.000   0.838                             T                                          _  45.83
-KBA     4.782 203.73 Pn               20 01  5.000  -0.365                             T                                          _  45.82
-KBA     4.782 203.73 Sg               20 02 21.900  -3.236                                                                        _  87.72
-TNS     5.046 258.47 Pn               20 01  7.100  -0.178                             T  D                                       _  45.80
-TNS     5.046 258.47 Pg               20 01 28.400   0.566                             T  D                                       _  87.58
-TNS     5.046 258.47 Sg               20 02 30.700  -2.460                                                                        _  87.58
-WATA    5.120 217.51 Pn               20 01  9.400  -0.395                             T                                          _  45.81
-WATA    5.120 217.51 Sg               20 02 38.200   2.187                                                                        _  87.54
-WTTA    5.157 216.68 Pn               20 01  9.900  -0.510                             T  D                                       _  45.81
-WTTA    5.157 216.68 Sg               20 02 35.700  -1.751                                D                                       _  87.52
-MOTA    5.298 220.45 Pn               20 01 11.300  -0.976                             T                                          _  45.81
-MOTA    5.298 220.45 Sg               20 02 38.600  -3.209                                                                        _  87.45
-SQTA    5.357 219.04 Pn               20 01 12.100  -0.882                             T                                          _  45.81
-SQTA    5.357 219.04 Sg               20 02 38.700  -4.758                                                                        _  87.42
-PTJ     5.595 181.43 Pn               20 01  4.900 -11.201                                                                        _  45.80
-OGA     5.719 218.03 Pn               20 01 18.800   0.535                             T                                          _  45.81
-HFS     8.776 351.89 Pn               20 01 58.800  -0.056                             T                                          _  45.76
-NORES   9.618 346.31 P1      Pn       20 02  9.100  -0.760                             T                                          _  45.70
-NORES   9.618 346.31 S1      Sn       20 03 51.100  -7.235                                                                        _  49.90
-NORES   9.618 346.31 Lg               20 04 55.000   4.979                                                                        _       
-FINES  11.370  24.82 P1      Pn       20 02 31.000  -3.960                                                                        _  45.60
-FINES  11.370  24.82 S1      Sn       20 04 33.000 -10.120                                                                        _  49.74
-FINES  11.370  24.82 Lg               20 05 55.100  10.669                                                                        _       
-ARCES  18.639  10.30 P1      P        20 04  6.600  -3.252                                                                        _  35.01
+KSP     0.651 172.43 Pg               20 00  4.400   1.206                                D                                       _  89.21
+KSP     0.651 172.43 Sg               20 00 14.000   2.147                                D                                       _  89.21
+BRG     1.524 247.05 Pn               20 00 17.900  -1.165                                D                                       _  45.84
+BRG     1.524 247.05 Pg      Pn       20 00 19.600   0.535                             T  D                                       _  45.84
+BRG     1.524 247.05 Sg               20 00 40.100  -0.053                             T  D                                       _  89.60
+PRU     1.819 215.00 Pn               20 00 22.900  -0.711                             T  D                                       _  45.84
+PRU     1.819 215.00 Pg               20 00 24.900  -1.142                             T  D                                       _  89.39
+PRU     1.819 215.00 Px      sPg      20 00 28.600   1.387                                 R                                      _ 143.38
+PRU     1.819 215.00 Sn               20 00 42.100  -5.969                                                                        _  50.18
+PRU     1.819 215.00 Sg               20 00 49.200  -0.386                             T  D                                       _  89.39
+RAC     1.910 136.62 Pg               20 00 28.300   0.473                             T  D                                       _  89.33
+RAC     1.910 136.62 Sg               20 00 52.500  -0.115                             T  D                                       _  89.33
+CLL     1.985 266.03 Pn               20 00 24.300  -1.061                             T  D                                       _  45.84
+CLL     1.985 266.03 Pg               20 00 28.000  -1.334                                D                                       _  89.28
+CLL     1.985 266.03 Sg               20 00 54.500  -0.691                             T  D                                       _  89.28
+OKC     2.081 141.76 Pn               20 00 26.400  -0.441                             T  D                                       _  45.83
+OKC     2.081 141.76 Pg               20 00 30.700  -0.334                             T  D                                       _  89.21
+OKC     2.081 141.76 Sg               20 00 58.000   0.075                             T  D                                       _  89.21
+VRAC    2.200 172.55 Pn               20 00 29.700   0.937                             T  D                                       _  45.84
+VRAC    2.200 172.55 Sn      Sg       20 01  1.800  -0.151                             T  D                                       _  89.14
+OJC     2.633 117.40 Pn               20 00 33.000  -1.565                                D                                       _  45.84
+OJC     2.633 117.40 Pg               20 00 41.300  -0.511                             T  D                                       _  88.87
+OJC     2.633 117.40 Sn               20 01  4.900  -2.879                                D                                       _  50.18
+OJC     2.633 117.40 Sg               20 01 16.500   0.351                             T  D                                       _  88.87
+KHC     2.881 216.03 Pn               20 00 38.000  -0.239                             T  D                                       _  45.83
+KHC     2.881 216.03 Pg               20 00 44.000  -2.442                                D                                       _  88.73
+KHC     2.881 216.03 Sn               20 01 15.000   0.638                             T  D                                       _  50.17
+KHC     2.881 216.03 Sg               20 01 23.000  -0.823                             T  D                                       _  88.73
+KHC     2.881 216.03 Sx      SnSn     20 01 26.000  -0.089                                 R                                      _  50.18
+HOF     2.954 248.22 Pn               20 00 38.800   0.344                             T                                          _  45.84
+MOX     2.986 255.39 Pn               20 00 38.700  -0.162                             T  D                                       _  45.84
+MOX     2.986 255.39 Pg               20 00 47.600  -0.863                             T  D                                       _  88.67
+MOX     2.986 255.39 Sg               20 01 27.200  -0.014                             T  D                                       _  88.67
+GERES   3.081 211.79 Pn               20 00 40.700  -0.301  33.50    3.59 12.48  -1.27 TA                                         _  45.84
+GERES   3.081 211.79 Pg               20 00 48.000  -2.575  29.50   -0.41 16.34  -2.83  A D                                       _  88.62
+GERES   3.081 211.79 Sg               20 01 28.800  -2.193  31.50    1.59 25.84  -6.30  A D                                       _  88.62
+WET     3.150 223.13 Pn               20 00 42.000   0.413                             T                                          _  45.83
+VKA     3.228 178.09 Pn               20 00 43.600   0.464                             T                                          _  45.83
+VKA     3.228 178.09 Pg               20 00 51.000  -2.495                                D                                       _  88.54
+VKA     3.228 178.09 Sg               20 01 34.700  -1.250                                D                                       _  88.54
+ZST     3.351 169.12 Pg               20 00 52.200  -3.656                                                                        _  88.47
+ZST     3.351 169.12 Px      Pg       20 00 55.900   0.044                                                                        _  88.47
+ZST     3.351 169.12 Sx      SnSn     20 01 38.700   0.641                                 R                                      _  50.18
+ZST     3.351 169.12 Lg               20 01 45.000   9.635                                                                        _       
+GRB3    3.514 234.06 Pn               20 00 48.200   1.865                                                                        _  45.84
+GRB3    3.514 234.06 Pg               20 00 58.900   0.076                             T                                          _  88.39
+GRA3    3.532 242.61 Pn               20 00 47.100   0.546                             T  D                                       _  45.84
+GRA3    3.532 242.61 Pg               20 00 59.900   0.761                             T  D                                       _  88.38
+GRB1    3.562 235.68 Pn               20 00 47.700   0.716                             T  D                                       _  45.84
+GRB1    3.562 235.68 Pg               20 01  0.700   0.967                             T  D                                       _  88.36
+GRB1    3.562 235.68 Sg               20 01 46.400   0.103                             T  D                                       _  88.36
+GRB4    3.564 237.25 Pg               20 01  0.800   1.026                             T                                          _  88.36
+GRA2    3.566 240.91 Pn               20 00 47.800   0.749                             T                                          _  45.84
+GRA4    3.575 239.27 Pn               20 00 47.900   0.738                             T                                          _  45.84
+CLZ     3.619 277.90 Pn               20 00 48.800   0.510                             T  D                                       _  45.83
+CLZ     3.619 277.90 Sn               20 01 32.400  -0.240                             T  D                                       _  50.16
+GRF     3.623 242.17 Pn               20 00 47.100  -0.719                             T  D                                       _  45.84
+GRF     3.623 242.17 Px      pPn      20 00 48.300  -0.131                                 R                                      _ 134.16
+GRF     3.623 242.17 Pg               20 01  1.000   0.105                             T  D                                       _  88.33
+GRF     3.623 242.17 Sg               20 01 47.800  -0.447                             T  D                                       _  88.33
+GRB2    3.630 234.07 Pn               20 00 48.500   0.561                             T                                          _  45.84
+GRB2    3.630 234.07 Pg               20 00 59.600  -1.447                                                                        _  88.33
+GRB5    3.729 232.10 Pn               20 00 50.300   1.014                             T  D                                       _  45.84
+GRB5    3.729 232.10 Pg               20 01  2.700  -0.236                             T  D                                       _  88.27
+GRC4    3.820 232.82 Pn               20 00 52.100   1.572                                                                        _  45.84
+GRC4    3.820 232.82 Pg               20 01  4.000  -0.670                             T                                          _  88.22
+GRC1    3.882 231.83 Pn               20 00 52.400   0.949                             T  D                                       _  45.84
+GRC1    3.882 231.83 Pg               20 01  5.000  -0.862                             T  D                                       _  88.19
+GRC1    3.882 231.83 Sg               20 01 56.400  -0.170                             T  D                                       _  88.19
+GRC3    3.923 230.27 Pn               20 00 53.000   1.021                             T                                          _  45.83
+GRC3    3.923 230.27 Pg               20 01  5.900  -0.707                             T                                          _  88.17
+GRC2    4.040 231.39 Pg               20 01  7.000  -1.851                                                                        _  88.11
+BHG     4.331 210.76 Pn               20 01  0.900   2.137                                                                        _  45.83
+FUR     4.587 225.43 Pn               20 01  2.000   0.857                             T                                          _  45.83
+KBA     4.782 203.73 Pn               20 01  5.000  -0.345                             T                                          _  45.82
+KBA     4.782 203.73 Sg               20 02 21.900  -3.199                                                                        _  87.72
+TNS     5.046 258.47 Pn               20 01  7.100  -0.164                             T  D                                       _  45.80
+TNS     5.046 258.47 Pg               20 01 28.400   0.582                             T  D                                       _  87.58
+TNS     5.046 258.47 Sg               20 02 30.700  -2.439                                                                        _  87.58
+WATA    5.119 217.51 Pn               20 01  9.400  -0.375                             T                                          _  45.81
+WATA    5.119 217.51 Sg               20 02 38.200   2.222                                                                        _  87.54
+WTTA    5.156 216.69 Pn               20 01  9.900  -0.490                             T  D                                       _  45.81
+WTTA    5.156 216.69 Sg               20 02 35.700  -1.715                                D                                       _  87.52
+MOTA    5.297 220.46 Pn               20 01 11.300  -0.957                             T                                          _  45.81
+MOTA    5.297 220.46 Sg               20 02 38.600  -3.174                                                                        _  87.45
+SQTA    5.356 219.05 Pn               20 01 12.100  -0.863                             T                                          _  45.81
+SQTA    5.356 219.05 Sg               20 02 38.700  -4.723                                                                        _  87.42
+PTJ     5.594 181.43 Pn               20 01  4.900 -11.181                                                                        _  45.80
+OGA     5.718 218.03 Pn               20 01 18.800   0.554                             T                                          _  45.81
+HFS     8.776 351.90 Pn               20 01 58.800  -0.059                             T                                          _  45.76
+NORES   9.619 346.31 P1      Pn       20 02  9.100  -0.763                             T                                          _  45.70
+NORES   9.619 346.31 S1      Sn       20 03 51.100  -7.247                                                                        _  49.90
+NORES   9.619 346.31 Lg               20 04 55.000   4.962                                                                        _       
+FINES  11.371  24.82 P1      Pn       20 02 31.000  -3.964                                                                        _  45.60
+FINES  11.371  24.82 S1      Sn       20 04 33.000 -10.134                                                                        _  49.74
+FINES  11.371  24.82 Lg               20 05 55.100  10.649                                                                        _       
+ARCES  18.639  10.30 P1      P        20 04  6.600  -3.255                                                                        _  35.01
 
 Defining travel-time differences:
 
  Stat  Delta  Phases           Observed   Res
 
-KSP     0.652 Sg - Pg             9.600   0.930
-BRG     1.524 Sg - Pn            22.200   1.101
-BRG     1.524 Sg - Pn            20.500  -0.599
-PRU     1.820 Sg - Pg            24.300   0.744
-PRU     1.820 Sg - Pn            26.300   0.308
-PRU     1.820 Pg - Pn             2.000  -0.436
-RAC     1.910 Sg - Pg            24.200  -0.594
-CLL     1.985 Pg - Pn             3.700  -0.275
-CLL     1.985 Sg - Pn            30.200   0.365
-CLL     1.985 Sg - Pg            26.500   0.639
-OKC     2.082 Sg - Pg            27.300   0.402
-OKC     2.082 Sg - Pn            31.600   0.507
-OKC     2.082 Pg - Pn             4.300   0.104
-VRAC    2.201 Sg - Pn            32.100  -1.104
-OJC     2.634 Pg - Pn             8.300   1.053
-OJC     2.634 Sn - Pn            31.900  -1.315
-OJC     2.634 Sg - Pg            35.200   0.860
-KHC     2.882 Sn - Pn            37.000   0.867
-KHC     2.882 Sg - Sn             8.000  -1.467
-KHC     2.882 Sg - Pg            39.000   1.607
-KHC     2.882 Sg - Pn            45.000  -0.600
-MOX     2.987 Pg - Pn             8.900  -0.703
-MOX     2.987 Sg - Pn            48.500   0.140
-MOX     2.987 Sg - Pg            39.600   0.843
-GERES   3.082 Sg - Pg            40.800   0.370
-VKA     3.229 Sg - Pg            43.700   1.233
-GRA3    3.533 Pg - Pn            12.800   0.212
-GRB1    3.563 Sg - Pg            45.700  -0.873
-GRB1    3.563 Pg - Pn            13.000   0.248
-GRB1    3.563 Sg - Pn            58.700  -0.625
-CLZ     3.619 Sn - Pn            43.600  -0.751
-GRF     3.623 Pg - Pn            13.900   0.821
-GRF     3.623 Sg - Pn            60.700   0.261
-GRF     3.623 Sg - Pg            46.800  -0.560
-GRB5    3.729 Pg - Pn            12.400  -1.254
-GRC1    3.883 Sg - Pg            51.400   0.682
-GRC1    3.883 Sg - Pn            64.000  -1.132
-TNS     5.046 Pg - Pn            21.300   0.744
-WTTA    5.157 Sg - Pn            85.800  -1.241
+KSP     0.651 Sg - Pg             9.600   0.941
+BRG     1.524 Sg - Pn            22.200   1.111
+BRG     1.524 Sg - Pn            20.500  -0.589
+PRU     1.819 Sg - Pg            24.300   0.755
+PRU     1.819 Sg - Pn            26.300   0.324
+PRU     1.819 Pg - Pn             2.000  -0.431
+RAC     1.910 Sg - Pg            24.200  -0.588
+CLL     1.985 Pg - Pn             3.700  -0.273
+CLL     1.985 Sg - Pn            30.200   0.370
+CLL     1.985 Sg - Pg            26.500   0.643
+OKC     2.081 Sg - Pg            27.300   0.410
+OKC     2.081 Sg - Pn            31.600   0.517
+OKC     2.081 Pg - Pn             4.300   0.107
+VRAC    2.200 Sg - Pn            32.100  -1.089
+OJC     2.633 Pg - Pn             8.300   1.054
+OJC     2.633 Sn - Pn            31.900  -1.313
+OJC     2.633 Sg - Pg            35.200   0.863
+KHC     2.881 Sn - Pn            37.000   0.876
+KHC     2.881 Sg - Sn             8.000  -1.461
+KHC     2.881 Sg - Pg            39.000   1.618
+KHC     2.881 Sg - Pn            45.000  -0.584
+MOX     2.986 Pg - Pn             8.900  -0.701
+MOX     2.986 Sg - Pn            48.500   0.148
+MOX     2.986 Sg - Pg            39.600   0.849
+GERES   3.081 Sg - Pg            40.800   0.381
+VKA     3.228 Sg - Pg            43.700   1.245
+GRA3    3.532 Pg - Pn            12.800   0.215
+GRB1    3.562 Sg - Pg            45.700  -0.864
+GRB1    3.562 Pg - Pn            13.000   0.252
+GRB1    3.562 Sg - Pn            58.700  -0.612
+CLZ     3.619 Sn - Pn            43.600  -0.750
+GRF     3.623 Pg - Pn            13.900   0.824
+GRF     3.623 Sg - Pn            60.700   0.272
+GRF     3.623 Sg - Pg            46.800  -0.551
+GRB5    3.729 Pg - Pn            12.400  -1.250
+GRC1    3.882 Sg - Pg            51.400   0.692
+GRC1    3.882 Sg - Pn            64.000  -1.118
+TNS     5.046 Pg - Pn            21.300   0.746
+WTTA    5.156 Sg - Pn            85.800  -1.225
 
 Number of usable stations:   43
 
@@ -198,21 +200,21 @@ Maximum azimuthal gap of defining observations: 351.9 -> 117.4 [deg] = 125.5 [de
 Maximum secondary azimuthal gap of defining observations: 351.9 -> 136.6 [deg] = 144.7 [deg]; CPQ =  0.641
 
 Residuals of defining data          RMS     MEAN-RES       MEAN
-    59 onset times             :    0.606       0.527      0.000  [s]
-     3 backazimuth values      :    2.285       1.866      1.599  [deg]
-    39 travel-time differences :    0.824       0.733      0.039  [s]
+    60 onset times             :    0.619       0.536      0.000  [s]
+     3 backazimuth values      :    2.282       1.865      1.594  [deg]
+    39 travel-time differences :    0.824       0.734      0.047  [s]
 
-Weighted RMS of onset times (ISC type):    0.615 [s]
+Weighted RMS of onset times (ISC type):    0.626 [s]
 
 Weighted misfit of input data         L1      L2
-    96 onset times             :    5.680    9.623
-     3 backazimuth values      :    0.373    0.457
+    96 onset times             :    5.666    9.609
+     3 backazimuth values      :    0.373    0.456
      3 ray parameters          :    1.393    1.483
-    39 travel-time differences :    1.986    2.253
-   141 misfit over all         :    4.454    8.031
+    39 travel-time differences :    1.988    2.252
+   141 misfit over all         :    4.445    8.020
 
 T0                         LAT      LON       Z     VPVS   DLAT     DLON      DZ       DT0    DVPVS DEF    RMS
-1995-02-01 19 59 51.230   51.488   16.158    1.00   1.69   0.0165   0.0194  Fixed     0.248   0.04  101    0.606
+1995-02-01 19 59 51.222   51.488   16.158    1.00   1.68   0.0166   0.0195  Fixed     0.250   0.05  102    0.619
 
 CRUST 1.0 model for source-region (max. delta =  1.50 deg):
     DEPTH       VP        VS    DISCON
@@ -231,7 +233,7 @@ P velocity in source depth:   6.10
 S velocity in source depth:   3.55
 
 Iterations        :    5
-Number of defining:  102
+Number of defining:   99
 Reference models  : CRUST 1.0 and ak135_A             
 CRUST 1.0 used for Station corrections
 CRUST 1.0 used for Reflection Point corrections
@@ -240,197 +242,195 @@ The new source parameters:
 
 Confidence level of given uncertainties:  95.00 %
 
-Source time  : 1995 02 01 19 59 50.612 +/-    0.375 [s]
-        or               791668790.612 +/-    0.375 [s]
-        or       1995-032:19.59.50.612 +/-    0.375 [s]
+Source time  : 1995 02 01 19 59 50.639 +/-    0.367 [s]
+        or               791668790.639 +/-    0.367 [s]
+        or       1995-032:19.59.50.639 +/-    0.367 [s]
 
-Epicenter lat:                 51.5030 +/-   0.0181 [deg]
-Epicenter lon:                 16.1633 +/-   0.0194 [deg]
+Epicenter lat:                 51.4987 +/-   0.0175 [deg]
+Epicenter lon:                 16.1627 +/-   0.0188 [deg]
 Source depth :                  0.00   [km] Fixed by HYPOSAT
 
-Source time corrected for mean travel-time residual (     0.074 [s])
+Source time corrected for mean travel-time residual (     0.078 [s])
 
-Source time  : 1995 02 01 19 59 50.686 +/-    0.375 [s]
-        or               791668790.686 +/-    0.375 [s]
-        or       1995-032:19.59.50.686 +/-    0.375 [s]
+Source time  : 1995 02 01 19 59 50.717 +/-    0.367 [s]
+        or               791668790.717 +/-    0.367 [s]
+        or       1995-032:19.59.50.717 +/-    0.367 [s]
 
 Epicenter uncertainty ellipse:
-Major half axis:     2.58 [km]  Minor half axis:     1.28 [km]
-Azimuth:      117.5  [deg] Area:          10.33 [km^2]
+Major half axis:     2.49 [km]  Minor half axis:     1.32 [km]
+Azimuth:      114.5  [deg] Area:          10.34 [km^2]
 
 Flinn-Engdahl Region ( 548 ): EASTERN PART OF WEST EUROPEAN PLATFORM
 
  Stat  Delta   Azi   Phase   [used]    Onset time    Res     Baz     Res   Rayp   Res  Used      SNR    Amplitude  Period  MAG    Q Em-Ang
 
-KSP     0.666 172.90 Pg               20 00  4.400   1.389                                D                                       _  24.19
-KSP     0.666 172.90 Sg               20 00 14.000   2.015                                D                                       _  17.54
-BRG     1.533 246.57 Pn               20 00 17.900  -0.875                             T  D                                       _  45.84
-BRG     1.533 246.57 Pg               20 00 19.600  -0.452                             T  D                                       _  89.23
-BRG     1.533 246.57 Sg               20 00 40.100   0.180                             T  D                                       _  89.23
-PRU     1.833 214.82 Pn               20 00 22.900  -0.496                             T  D                                       _  45.84
-PRU     1.833 214.82 Pg               20 00 24.900  -0.891                             T  D                                       _  89.08
-PRU     1.833 214.82 Px      PnPn     20 00 28.600  -1.642                                 R                                      _  45.84
-PRU     1.833 214.82 Sn               20 00 42.100  -5.980                                                                        _  50.18
-PRU     1.833 214.82 Sg               20 00 49.200  -0.329                             T  D                                       _  89.08
-RAC     1.919 137.01 Pg               20 00 28.300   0.833                             T  D                                       _  89.04
-RAC     1.919 137.01 Sg               20 00 52.500   0.126                             T  D                                       _  89.04
-CLL     1.989 265.59 Pn               20 00 24.300  -0.707                             T  D                                       _  45.83
-CLL     1.989 265.59 Pg               20 00 28.000  -0.889                             T  D                                       _  89.01
-CLL     1.989 265.59 Sg               20 00 54.500  -0.308                             T  D                                       _  89.01
-OKC     2.091 142.11 Pn               20 00 26.400  -0.164                             T  D                                       _  45.83
-OKC     2.091 142.11 Pg               20 00 30.700   0.004                             T  D                                       _  88.95
-OKC     2.091 142.11 Sg               20 00 58.000   0.279                             T  D                                       _  88.95
-VRAC    2.215 172.69 Pn      Pb       20 00 29.700  -1.412                                D                                       _  62.80
-VRAC    2.215 172.69 Sn      Sg       20 01  1.800  -0.104                             T  D                                       _  88.89
-OJC     2.638 117.74 Pn               20 00 33.000  -1.206                             T  D                                       _  45.84
-OJC     2.638 117.74 Pg               20 00 41.300  -0.060                             T  D                                       _  88.68
-OJC     2.638 117.74 Sn               20 01  4.900  -2.629                                D                                       _  50.18
-OJC     2.638 117.74 Sg               20 01 16.500   0.745                             T  D                                       _  88.68
-KHC     2.896 215.91 Pn               20 00 38.000  -0.023                             T  D                                       _  45.83
-KHC     2.896 215.91 Pg               20 00 44.000  -2.191                                D                                       _  88.55
-KHC     2.896 215.91 Sn               20 01 15.000   0.629                             T  D                                       _  50.16
-KHC     2.896 215.91 Sg               20 01 23.000  -0.766                             T  D                                       _  88.55
-KHC     2.896 215.91 Sx      SnSn     20 01 26.000  -0.291                                 R                                      _  50.18
-HOF     2.963 247.97 Pn               20 00 38.800   0.637                             T                                          _  45.84
-MOX     2.994 255.12 Pn               20 00 38.700   0.154                             T  D                                       _  45.84
-MOX     2.994 255.12 Pg               20 00 47.600  -0.473                             T  D                                       _  88.50
-MOX     2.994 255.12 Sg               20 01 27.200   0.278                             T  D                                       _  88.50
-GERES   3.096 211.69 Pn               20 00 40.700  -0.091  33.50    3.69 12.48  -1.27 TA                                         _  45.84
-GERES   3.096 211.69 Pg               20 00 48.000  -2.333  29.50   -0.31 16.34  -2.83  A D                                       _  88.45
-GERES   3.096 211.69 Sg               20 01 28.800  -2.151  31.50    1.69 25.84  -6.30  A D                                       _  88.45
-WET     3.164 222.99 Pn               20 00 42.000   0.642                             T                                          _  45.83
-VKA     3.243 178.17 Pn               20 00 43.600   0.669                             T                                          _  45.83
-VKA     3.243 178.17 Pg               20 00 51.000  -2.261                                D                                       _  88.38
-VKA     3.243 178.17 Sg               20 01 34.700  -1.221                             T  D                                       _  88.38
-ZST     3.366 169.23 Pg               20 00 52.200  -3.407                                                                        _  88.32
-ZST     3.366 169.23 Px      PgPgPg   20 00 55.900   0.224                                                                        _  89.44
-ZST     3.366 169.23 Sx      SgSg     20 01 38.700  -0.848                                 R                                      _  89.16
-ZST     3.366 169.23 Lg      SbSbSb   20 01 45.000   0.591                                                                        _  63.62
-GRB3    3.526 233.89 Pn               20 00 48.200   2.118                                D                                       _  45.83
-GRB3    3.526 233.89 Pg               20 00 58.900   0.376                             T  D                                       _  88.24
-GRA3    3.542 242.42 Pn               20 00 47.100   0.822                             T  D                                       _  45.83
-GRA3    3.542 242.42 Pg               20 00 59.900   1.094                                D                                       _  88.23
-GRB1    3.574 235.51 Pn               20 00 47.700   0.973                             T  D                                       _  45.83
-GRB1    3.574 235.51 Pg               20 01  0.700   1.274                                D                                       _  88.21
-GRB1    3.574 235.51 Sg               20 01 46.400   0.254                             T  D                                       _  88.21
-GRB4    3.575 237.07 Pg               20 01  0.800   1.338                                                                        _  88.21
-GRA2    3.577 240.73 Pn               20 00 47.800   1.021                             T                                          _  45.83
-GRA4    3.586 239.09 Pn               20 00 47.900   1.005                             T                                          _  45.83
-CLZ     3.620 277.65 Pn               20 00 48.800   0.909                             T  D                                       _  45.82
-CLZ     3.620 277.65 Sn               20 01 32.400   0.080                             T  D                                       _  50.15
-GRF     3.633 241.99 Pn               20 00 47.100  -0.444                             T  D                                       _  45.83
-GRF     3.633 241.99 Px      Pn       20 00 48.300   0.756                                                                        _  45.83
-GRF     3.633 241.99 Pg               20 01  1.000   0.436                             T  D                                       _  88.18
-GRF     3.633 241.99 Sg               20 01 47.800  -0.254                             T  D                                       _  88.18
-GRB2    3.642 233.90 Pn               20 00 48.500   0.814                             T                                          _  45.83
-GRB2    3.642 233.90 Pg               20 00 59.600  -1.147                             T                                          _  88.18
-GRB5    3.741 231.95 Pn               20 00 50.300   1.262                                D                                       _  45.83
-GRB5    3.741 231.95 Pg               20 01  2.700   0.058                             T  D                                       _  88.13
-GRC4    3.832 232.67 Pn               20 00 52.100   1.822                                                                        _  45.83
-GRC4    3.832 232.67 Pg               20 01  4.000  -0.374                             T                                          _  88.08
-GRC1    3.895 231.69 Pn               20 00 52.400   1.196                                D                                       _  45.83
-GRC1    3.895 231.69 Pg               20 01  5.000  -0.569                             T  D                                       _  88.05
-GRC1    3.895 231.69 Sg               20 01 56.400  -0.043                             T  D                                       _  88.05
-GRC3    3.936 230.13 Pn               20 00 53.000   1.265                                D                                       _  45.83
-GRC3    3.936 230.13 Pg               20 01  5.900  -0.420                             T  D                                       _  88.03
-GRC2    4.052 231.25 Pg               20 01  7.000  -1.561                                                                        _  87.97
-BHG     4.346 210.70 Pn               20 01  0.900   2.346                                                                        _  45.82
-FUR     4.600 225.33 Pn               20 01  2.000   1.090                                                                        _  45.82
-KBA     4.797 203.70 Pn               20 01  5.000  -0.142                             T                                          _  45.81
-KBA     4.797 203.70 Sg               20 02 21.900  -3.181                                                                        _  87.60
-TNS     5.052 258.31 Pn               20 01  7.100   0.164                             T  D                                       _  45.79
-TNS     5.052 258.31 Pg               20 01 28.400   0.984                             T  D                                       _  87.48
-TNS     5.052 258.31 Sg               20 02 30.700  -2.129                                                                        _  87.48
-WATA    5.133 217.44 Pn               20 01  9.400  -0.156                             T                                          _  45.81
-WATA    5.133 217.44 Sg               20 02 38.200   2.277                                                                        _  87.44
-WTTA    5.171 216.62 Pn               20 01  9.900  -0.273                             T  D                                       _  45.81
-WTTA    5.171 216.62 Sg               20 02 35.700  -1.663                                D                                       _  87.42
-MOTA    5.312 220.38 Pn               20 01 11.300  -0.733                             T                                          _  45.81
-MOTA    5.312 220.38 Sg               20 02 38.600  -3.108                                                                        _  87.35
-SQTA    5.370 218.98 Pn               20 01 12.100  -0.642                             T                                          _  45.81
-SQTA    5.370 218.98 Sg               20 02 38.700  -4.663                                                                        _  87.32
-PTJ     5.609 181.47 Pn               20 01  4.900 -10.979                                                                        _  45.80
-OGA     5.732 217.97 Pn               20 01 18.800   0.774                             T                                          _  45.80
-HFS     8.761 351.86 Pn               20 01 58.800   0.560                             T                                          _  45.76
-NORES   9.605 346.27 P1      Pn       20 02  9.100  -0.152                             T                                          _  45.70
-NORES   9.605 346.27 S1      Sn       20 03 51.100  -6.547                                                                        _  49.90
-NORES   9.605 346.27 Lg               20 04 55.000   5.944                                                                        _       
-FINES  11.355  24.84 P1      Pn       20 02 31.000  -3.336                                                                        _  45.60
-FINES  11.355  24.84 S1      Sn       20 04 33.000  -9.405                                                                        _  49.73
-FINES  11.355  24.84 Lg      SgSg     20 05 55.100   0.458                                 R                                      _  87.17
-ARCES  18.624  10.30 P1      P        20 04  6.600  -2.684                                                                        _  35.01
+KSP     0.662 172.82 Pg               20 00  4.400   1.435                                D                                       _  24.19
+KSP     0.662 172.82 Sg               20 00 14.000   2.118                                D                                       _  17.54
+BRG     1.531 246.72 Pn               20 00 17.900  -0.878                             T  D                                       _  45.84
+BRG     1.531 246.72 Pg               20 00 19.600  -0.444                             T  D                                       _  89.23
+BRG     1.531 246.72 Sg               20 00 40.100   0.215                             T  D                                       _  89.23
+PRU     1.830 214.88 Pn               20 00 22.900  -0.475                             T  D                                       _  45.84
+PRU     1.830 214.88 Pg               20 00 24.900  -0.849                             T  D                                       _  89.09
+PRU     1.830 214.88 Px      PnPn     20 00 28.600  -1.621                                 R                                      _  45.84
+PRU     1.830 214.88 Sn               20 00 42.100  -5.918                                                                        _  50.18
+PRU     1.830 214.88 Sg               20 00 49.200  -0.238                             T  D                                       _  89.08
+RAC     1.916 136.92 Pg               20 00 28.300   0.858                             T  D                                       _  89.04
+RAC     1.916 136.92 Sg               20 00 52.500   0.189                             T  D                                       _  89.04
+CLL     1.989 265.71 Pn               20 00 24.300  -0.728                             T  D                                       _  45.83
+CLL     1.989 265.71 Pg               20 00 28.000  -0.907                             T  D                                       _  89.01
+CLL     1.989 265.71 Sg               20 00 54.500  -0.316                             T  D                                       _  89.01
+OKC     2.088 142.02 Pn               20 00 26.400  -0.151                             T  D                                       _  45.83
+OKC     2.088 142.02 Pg               20 00 30.700   0.034                             T  D                                       _  88.96
+OKC     2.088 142.02 Sg               20 00 58.000   0.351                             T  D                                       _  88.96
+VRAC    2.210 172.67 Pn               20 00 29.700   1.176                                D                                       _  45.83
+VRAC    2.210 172.67 Sn      Sg       20 01  1.800   0.002                             T  D                                       _  88.89
+OJC     2.636 117.65 Pn               20 00 33.000  -1.214                             T  D                                       _  45.84
+OJC     2.636 117.65 Pg               20 00 41.300  -0.059                             T  D                                       _  88.68
+OJC     2.636 117.65 Sn               20 01  4.900  -2.619                                D                                       _  50.18
+OJC     2.636 117.65 Sg               20 01 16.500   0.768                             T  D                                       _  88.68
+KHC     2.892 215.95 Pn               20 00 38.000  -0.002                             T  D                                       _  45.83
+KHC     2.892 215.95 Pg               20 00 44.000  -2.150                                D                                       _  88.55
+KHC     2.892 215.95 Sn               20 01 15.000   0.691                             T  D                                       _  50.16
+KHC     2.892 215.95 Sg               20 01 23.000  -0.677                             T  D                                       _  88.55
+KHC     2.892 215.95 Sx      SnSn     20 01 26.000  -0.229                                 R                                      _  50.18
+HOF     2.961 248.05 Pn               20 00 38.800   0.633                             T                                          _  45.84
+MOX     2.992 255.20 Pn               20 00 38.700   0.143                             T  D                                       _  45.84
+MOX     2.992 255.20 Pg               20 00 47.600  -0.476                             T  D                                       _  88.50
+MOX     2.992 255.20 Sg               20 01 27.200   0.294                             T  D                                       _  88.50
+GERES   3.092 211.73 Pn               20 00 40.700  -0.069  33.50    3.65 12.48  -1.27 TA                                         _  45.84
+GERES   3.092 211.73 Pg               20 00 48.000  -2.289  29.50   -0.35 16.34  -2.83  A D                                       _  88.45
+GERES   3.092 211.73 Sg               20 01 28.800  -2.057  31.50    1.65 25.84  -6.30  A D                                       _  88.45
+WET     3.160 223.04 Pn               20 00 42.000   0.658                             T                                          _  45.83
+VKA     3.239 178.16 Pn               20 00 43.600   0.698                             T                                          _  45.83
+VKA     3.239 178.16 Pg               20 00 51.000  -2.209                                D                                       _  88.38
+VKA     3.239 178.16 Sg               20 01 34.700  -1.113                             T  D                                       _  88.38
+ZST     3.362 169.21 Pg               20 00 52.200  -3.357                                                                        _  88.32
+ZST     3.362 169.21 Px      PgPgPg   20 00 55.900   0.274                                                                        _  89.44
+ZST     3.362 169.21 Sx      SgSg     20 01 38.700  -0.744                                 R                                      _  89.16
+ZST     3.362 169.21 Lg               20 01 45.000   9.816                                                                        _       
+GRB3    3.523 233.94 Pn               20 00 48.200   2.126                                                                        _  45.83
+GRB3    3.523 233.94 Pg               20 00 58.900   0.400                             T                                          _  88.24
+GRA3    3.540 242.47 Pn               20 00 47.100   0.823                             T  D                                       _  45.83
+GRA3    3.540 242.47 Pg               20 00 59.900   1.108                                D                                       _  88.23
+GRB1    3.571 235.56 Pn               20 00 47.700   0.980                             T  D                                       _  45.83
+GRB1    3.571 235.56 Pg               20 01  0.700   1.296                                D                                       _  88.22
+GRB1    3.571 235.56 Sg               20 01 46.400   0.312                             T  D                                       _  88.22
+GRB4    3.573 237.13 Pg               20 01  0.800   1.358                                                                        _  88.21
+GRA2    3.574 240.78 Pn               20 00 47.800   1.023                                                                        _  45.83
+GRA4    3.583 239.15 Pn               20 00 47.900   1.008                             T                                          _  45.83
+CLZ     3.620 277.72 Pn               20 00 48.800   0.874                             T  D                                       _  45.82
+CLZ     3.620 277.72 Sn               20 01 32.400   0.043                             T  D                                       _  50.15
+GRF     3.631 242.04 Pn               20 00 47.100  -0.443                             T  D                                       _  45.83
+GRF     3.631 242.04 Px      Pn       20 00 48.300   0.757                                                                        _  45.83
+GRF     3.631 242.04 Pg               20 01  1.000   0.450                             T  D                                       _  88.19
+GRF     3.631 242.04 Sg               20 01 47.800  -0.209                             T  D                                       _  88.19
+GRB2    3.639 233.96 Pn               20 00 48.500   0.822                             T                                          _  45.83
+GRB2    3.639 233.96 Pg               20 00 59.600  -1.123                             T                                          _  88.18
+GRB5    3.738 232.00 Pn               20 00 50.300   1.272                                D                                       _  45.83
+GRB5    3.738 232.00 Pg               20 01  2.700   0.084                             T  D                                       _  88.13
+GRC4    3.829 232.72 Pn               20 00 52.100   1.831                                                                        _  45.83
+GRC4    3.829 232.72 Pg               20 01  4.000  -0.349                             T                                          _  88.09
+GRC1    3.892 231.73 Pn               20 00 52.400   1.206                                D                                       _  45.83
+GRC1    3.892 231.73 Pg               20 01  5.000  -0.543                             T  D                                       _  88.06
+GRC1    3.892 231.73 Sg               20 01 56.400   0.022                             T  D                                       _  88.06
+GRC3    3.932 230.18 Pn               20 00 53.000   1.276                                D                                       _  45.83
+GRC3    3.932 230.18 Pg               20 01  5.900  -0.392                             T  D                                       _  88.03
+GRC2    4.049 231.30 Pg               20 01  7.000  -1.534                                                                        _  87.98
+BHG     4.342 210.72 Pn               20 01  0.900   2.369                                                                        _  45.82
+FUR     4.597 225.36 Pn               20 01  2.000   1.104                                                                        _  45.82
+KBA     4.793 203.71 Pn               20 01  5.000  -0.117                             T                                          _  45.81
+KBA     4.793 203.71 Sg               20 02 21.900  -3.079                                                                        _  87.61
+TNS     5.051 258.36 Pn               20 01  7.100   0.150                             T  D                                       _  45.79
+TNS     5.051 258.36 Pg               20 01 28.400   0.976                             T  D                                       _  87.48
+TNS     5.051 258.36 Sg               20 02 30.700  -2.120                                                                        _  87.48
+WATA    5.130 217.47 Pn               20 01  9.400  -0.137                             T                                          _  45.81
+WATA    5.130 217.47 Sg               20 02 38.200   2.364                                                                        _  87.44
+WTTA    5.167 216.64 Pn               20 01  9.900  -0.253                             T  D                                       _  45.81
+WTTA    5.167 216.64 Sg               20 02 35.700  -1.575                                D                                       _  87.42
+MOTA    5.308 220.41 Pn               20 01 11.300  -0.715                             T                                          _  45.81
+MOTA    5.308 220.41 Sg               20 02 38.600  -3.025                                                                        _  87.35
+SQTA    5.367 219.00 Pn               20 01 12.100  -0.623                             T                                          _  45.81
+SQTA    5.367 219.00 Sg               20 02 38.700  -4.578                                                                        _  87.32
+PTJ     5.605 181.46 Pn               20 01  4.900 -10.950                                                                        _  45.80
+OGA     5.728 217.99 Pn               20 01 18.800   0.793                             T                                          _  45.80
+HFS     8.766 351.87 Pn               20 01 58.800   0.471                             T                                          _  45.76
+NORES   9.609 346.28 P1      Pn       20 02  9.100  -0.240                             T                                          _  45.70
+NORES   9.609 346.28 S1      Sn       20 03 51.100  -6.680                                                                        _  49.90
+NORES   9.609 346.28 Lg               20 04 55.000   5.783                                                                        _       
+FINES  11.359  24.84 P1      Pn       20 02 31.000  -3.424                                                                        _  45.60
+FINES  11.359  24.84 S1      Sn       20 04 33.000  -9.537                                                                        _  49.73
+FINES  11.359  24.84 Lg               20 05 55.100  11.510                                                                        _       
+ARCES  18.628  10.30 P1      P        20 04  6.600  -2.763                                                                        _  35.01
 
 Defining travel-time differences:
 
  Stat  Delta  Phases           Observed   Res
 
-KSP     0.666 Sg - Pg             9.600   0.627
-BRG     1.533 Pg - Pn             1.700   0.423
-BRG     1.533 Sg - Pn            22.200   1.055
-BRG     1.533 Sg - Pg            20.500   0.632
-PRU     1.833 Sg - Pg            24.300   0.562
-PRU     1.833 Sg - Pn            26.300   0.167
-PRU     1.833 Pg - Pn             2.000  -0.395
-RAC     1.919 Sg - Pg            24.200  -0.707
-CLL     1.989 Pg - Pn             3.700  -0.182
-CLL     1.989 Sg - Pn            30.200   0.399
-CLL     1.989 Sg - Pg            26.500   0.581
-OKC     2.091 Sg - Pg            27.300   0.275
-OKC     2.091 Sg - Pn            31.600   0.443
-OKC     2.091 Pg - Pn             4.300   0.168
-VRAC    2.215 Sg - Pb            32.100   1.308
-OJC     2.638 Pg - Pn             8.300   1.146
-OJC     2.638 Sn - Pn            31.900  -1.424
-OJC     2.638 Sg - Pg            35.200   0.805
-KHC     2.896 Sn - Pn            37.000   0.652
-KHC     2.896 Sg - Sn             8.000  -1.395
-KHC     2.896 Sg - Pg            39.000   1.425
-KHC     2.896 Sg - Pn            45.000  -0.743
-MOX     2.994 Pg - Pn             8.900  -0.627
-MOX     2.994 Sg - Pn            48.500   0.123
-MOX     2.994 Sg - Pg            39.600   0.750
-GERES   3.096 Sg - Pg            40.800   0.182
-VKA     3.243 Sg - Pg            43.700   1.040
-GRB3    3.526 Pg - Pn            10.700  -1.742
-GRA3    3.542 Pg - Pn            12.800   0.272
-GRB1    3.574 Sg - Pg            45.700  -1.020
-GRB1    3.574 Pg - Pn            13.000   0.301
-GRB1    3.574 Sg - Pn            58.700  -0.719
-CLZ     3.620 Sn - Pn            43.600  -0.829
-GRF     3.633 Pg - Pn            13.900   0.880
-GRF     3.633 Sg - Pn            60.700   0.190
-GRF     3.633 Sg - Pg            46.800  -0.690
-GRB5    3.741 Pg - Pn            12.400  -1.204
-GRC1    3.895 Sg - Pg            51.400   0.527
-GRC1    3.895 Sg - Pn            64.000  -1.239
-GRC3    3.936 Pg - Pn            12.900  -1.685
-TNS     5.052 Pg - Pn            21.300   0.820
-WTTA    5.171 Sg - Pn            85.800  -1.390
+KSP     0.662 Sg - Pg             9.600   0.683
+BRG     1.531 Sg - Pn            22.200   1.094
+BRG     1.531 Sg - Pg            20.500   0.659
+PRU     1.830 Sg - Pg            24.300   0.611
+PRU     1.830 Sg - Pn            26.300   0.237
+PRU     1.830 Pg - Pn             2.000  -0.374
+RAC     1.916 Sg - Pg            24.200  -0.669
+CLL     1.989 Pg - Pn             3.700  -0.178
+CLL     1.989 Sg - Pn            30.200   0.412
+CLL     1.989 Sg - Pg            26.500   0.590
+OKC     2.088 Sg - Pg            27.300   0.317
+OKC     2.088 Sg - Pn            31.600   0.502
+OKC     2.088 Pg - Pn             4.300   0.185
+VRAC    2.210 Sg - Pn            32.100  -1.173
+OJC     2.636 Pg - Pn             8.300   1.155
+OJC     2.636 Sn - Pn            31.900  -1.405
+OJC     2.636 Sg - Pg            35.200   0.827
+KHC     2.892 Sn - Pn            37.000   0.693
+KHC     2.892 Sg - Sn             8.000  -1.367
+KHC     2.892 Sg - Pg            39.000   1.474
+KHC     2.892 Sg - Pn            45.000  -0.674
+MOX     2.992 Pg - Pn             8.900  -0.619
+MOX     2.992 Sg - Pn            48.500   0.150
+MOX     2.992 Sg - Pg            39.600   0.769
+GERES   3.092 Sg - Pg            40.800   0.233
+VKA     3.239 Sg - Pg            43.700   1.096
+GRA3    3.540 Pg - Pn            12.800   0.285
+GRB1    3.571 Sg - Pn            58.700  -0.668
+GRB1    3.571 Pg - Pn            13.000   0.316
+GRB1    3.571 Sg - Pg            45.700  -0.984
+CLZ     3.620 Sn - Pn            43.600  -0.831
+GRF     3.631 Pg - Pn            13.900   0.893
+GRF     3.631 Sg - Pn            60.700   0.233
+GRF     3.631 Sg - Pg            46.800  -0.660
+GRB5    3.738 Pg - Pn            12.400  -1.188
+GRC1    3.892 Sg - Pg            51.400   0.566
+GRC1    3.892 Sg - Pn            64.000  -1.184
+GRC3    3.932 Pg - Pn            12.900  -1.669
+TNS     5.051 Pg - Pn            21.300   0.827
+WTTA    5.167 Sg - Pn            85.800  -1.322
 
 Number of usable stations:   43
 
 Total number of iterations:    17
 
-Maximum azimuthal gap of defining observations: 351.9 -> 117.7 [deg] = 125.9 [deg]; CPQ =  0.729
+Maximum azimuthal gap of defining observations: 351.9 -> 117.7 [deg] = 125.8 [deg]; CPQ =  0.730
 
-Maximum secondary azimuthal gap of defining observations: 351.9 -> 137.0 [deg] = 145.2 [deg]; CPQ =  0.638
+Maximum secondary azimuthal gap of defining observations: 351.9 -> 136.9 [deg] = 145.0 [deg]; CPQ =  0.639
 
 Residuals of defining data          RMS     MEAN-RES       MEAN
-    57 onset times             :    0.610       0.505      0.000  [s]
-     3 backazimuth values      :    2.351       1.897      1.692  [deg]
-    42 travel-time differences :    0.874       0.756     -0.006  [s]
+    56 onset times             :    0.595       0.491      0.000  [s]
+     3 backazimuth values      :    2.325       1.885      1.655  [deg]
+    40 travel-time differences :    0.845       0.744     -0.004  [s]
 
-Weighted RMS of onset times (ISC type):    0.613 [s]
+Weighted RMS of onset times (ISC type):    0.598 [s]
 
 Weighted misfit of input data         L1      L2
-    96 onset times             :    5.379    9.061
-     3 backazimuth values      :    0.379    0.470
+    96 onset times             :    5.586    9.362
+     3 backazimuth values      :    0.377    0.465
      3 ray parameters          :    1.393    1.484
-    42 travel-time differences :    2.070    2.417
-   144 misfit over all         :    4.227    7.516
+    40 travel-time differences :    2.025    2.323
+   142 misfit over all         :    4.384    7.799
 
 T0                         LAT      LON       Z     VPVS   DLAT     DLON      DZ       DT0    DVPVS DEF    RMS
-1995-02-01 19 59 50.686   51.503   16.163    0.00   1.69   0.0181   0.0194  Fixed     0.375   0.04  102    0.610
+1995-02-01 19 59 50.717   51.499   16.163    0.00   1.68   0.0175   0.0188  Fixed     0.367   0.05   99    0.595
 
 CRUST 1.0 model for source-region (max. delta =  1.50 deg):
     DEPTH       VP        VS    DISCON

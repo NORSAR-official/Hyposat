@@ -21,15 +21,14 @@ c
 c             dismin         minimum distance to one of the stations
 c                            in radian!
 c
-c             typctl       verbosity level
+c             typctl         verbosity level
 c
 c     output: elat, elon   geocentric coordinates of the event
 c
 c             elats, elons corresponding standard deviations
 c
-c             dismin       minimum distance to one of the stations
-c                          in radian!
-c
+c             dismin         minimum distance to one of the stations
+c                            in radian!
 c
 c version:  19. August 1996,  johannes schweitzer
 c
@@ -42,12 +41,16 @@ c                  Sep 06, 2021 'azi' changed to 'baz'
 c
 c                  Feb 27, 2023 small change for ierr
 c
+c                  Mar 31, 2026 F2 changed to fcheck
+c
+c     uses: dpythag, fcheck, alpha2
+c
 
       implicit real*8 (a-h,o-z)
 
-      real*8 dpythag
+      real*8 dpythag, fcheck, alpha2
 
-      integer typctl,ierr
+      integer typctl
 
 c
 c     Exclude combinations which give no crossing point because
@@ -82,8 +85,8 @@ c
       baz1r   = deg2rad*baz1
       baz2r   = deg2rad*baz2
 
-      del3    = deg2rad*del3
-      d3c     = dcos(del3)
+      del3r   = deg2rad*del3
+      d3c     = dcos(del3r)
       ep1r    = deg2rad*ep1
       ep2r    = deg2rad*ep2
 
@@ -130,12 +133,12 @@ c
       g2c = dcos(ga2)
 
       g3c = g1s*g2s*d3c-g1c*g2c
-      ga3 = f2(g3c,2)
+      ga3 = fcheck(g3c,2)
       g3s = dsin(ga3)
 
-      d1 = f2((g2c+g1c*g3c)/(g1s*g3s),2)
+      d1 = fcheck((g2c+g1c*g3c)/(g1s*g3s),2)
 
-      d2 = f2((g1c+g2c*g3c)/(g2s*g3s),2)
+      d2 = fcheck((g1c+g2c*g3c)/(g2s*g3s),2)
 
 c      if(typctl.gt.8) then
 c        print 1000,'ga1,ga2,ga3,al1 :',ga1*rad2deg,ga2*rad2deg,
@@ -180,7 +183,7 @@ c
 
       elax  = p1*p2 + p3*p4*p5
       if(dabs(elax).gt.1.00004999d0) goto 9999
-      elatr = f2(elax,2)
+      elatr = fcheck(elax,2)
 
       p7    = dsin (elatr)
 c    
@@ -195,7 +198,7 @@ c
       endif
 
       if(dabs(elox).gt.1.00004999d0) goto 9999
-      eloxr = f2(elox,2)
+      eloxr = fcheck(elox,2)
 
       if(baz1r .lt. pi) then
         elonr = slon1r + eloxr

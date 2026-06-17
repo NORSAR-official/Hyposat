@@ -11,18 +11,18 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOSAT_6_2b
+      program HYPOSAT_6_3
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
-      character  version*25, VDATE*20, cprog*50
-      parameter (version='HYPOSAT Version 6.2b     ' )
-c     parameter (vdate=' ( 08 December 2025)' )
-      parameter (vdate=' ' )
+      character  version*25, VDATE*20, cprog*50, vdate2*20
+      parameter (version='HYPOSAT Version 6.3     ' )
+      parameter ( vdate=' ( 17 June 2026)' )
+      parameter (vdate2='  ( 17 June 2026)' )
 
 c
-c     last changes: 08 December 2025
+c     last changes: 16 June 2026
 c
 c----------------------------------------------------------------------
 c
@@ -74,11 +74,12 @@ c                dlsq ellcal, ellip, elpcor, epmagc, fetoh2, fhtoe,
 c                findrange, get_mod_c10, get_mod_global, 
 c                get_mod_reg, get_station, hyposat_cross, hyposat_geo, 
 c                hyposat_gmi, indexx, isf_out_line, magfact, mult_ons, 
-c                plane, tauget_mod, tauget_ray, testphase, ttloc, zo2to
+c                plane, tauget_mod, tauget_ray, testphase, ttloc, zo2to,
+c                get_circ
 c
 c     functions: alpha1, alpha2, convlat, phase_type, phasw,
-c                ddmax, dirdel, dmean, q2, radloc, wdepth, rdid
-c                file_checkpara, getchi, dpythag,
+c                ddmax, dirdel, dmean, q2, radloc, wdepth, rdig,
+c                file_checkpara, getchi, dpythag, fcheck,
 c                read_event_id, read_origin, 
 c                read_origin_head, read_phase_head, read_phase, 
 c                write_origin, write_origin_head, lowcas, uppcas,
@@ -100,9 +101,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Functions called: variable definitions
 c
-      real*8           alpha1, alpha2, convlat, dirdel, q2, 
-     +                 radloc, dmean, ddmax, getchi, dpythag, wdepth,
-     +                 rdig
+      real*8           alpha1, alpha2, convlat, dirdel, q2, dpythag,
+     +                 radloc, dmean, ddmax, getchi, wdepth, rdig,
+     +                 fcheck
      
       character        phase_type*1, file_check*512, file_checkpara*512,
      +                 filepara*512, lowcas*1024, uppcas*1024, 
@@ -111,18 +112,24 @@ c
 c
 c     mstat = maximum number of stations
 c
-      parameter (mstat = 2000)
+      parameter (mstat = 2000, mstat2 = 2*mstat, mstat6 = 6*mstat)
 
       dimension stala(mstat),stalo(mstat),stael(mstat),del(mstat),
      +          azie(mstat),baz(mstat),stavp(mstat),
      +          stavs(mstat),istaph(mstat),stats(mstat),statp(mstat),
      +          delk(mstat),istad(mstat),istfil(mstat),statr(mstat),
-     +          stamb(mstat),stams(mstat),staml(mstat)
+     +          stamb(mstat),stams(mstat),staml(mstat), delkm(mstat),
+     +          ndelkm(mstat),delkms(mstat),stalag(mstat),azios(mstat),
+     +          azioc(mstat),nazio(mstat),azism(mstat),aziom(mstat)
 
       character*5 sta(mstat),stat,stato,statw,stat1,stationfile*512,
      +          statcorfile*512,outputfile*512,inputfile*512,
      +          magmlfile*512,outputisf*200,inputfilen*512,
      +          json_file*512,isf_file*512,statfile2*512
+
+      data      sta / mstat*'     ' /
+      data      aziom, azios, azioc, azism, delkm, delkms /mstat6*0.d0 /
+      data      nazio, ndelkm / mstat2*0 / 
 c
 c     mread = maximum number of phases (hyposat-in file)
 c
@@ -145,7 +152,7 @@ c
      +          phai*8,phaj*8,o_string*550,textout*160,text(mread)*160,
      +          arid(mread)*8,statcorstr*80, texth*160,phid0*8,
      +          comment(mread)*72,comm2(mrd2)*72,usedm*6,phsearch*1,
-     +          useds*6, phcheck*8, usedr*1, usedsr*1, 
+     +          useds*6, phcheck*8, usedr*1, usedsr*1, phase_tu*1,
      +          textouts*1024,stringt*30,onflag(mread)*3
 
       dimension azi(mread),tt(mread),p(mread),azis(mread),tts(mread),
@@ -164,6 +171,7 @@ c
       include 'gmi.h'
 
       dimension var2(mvar)
+      data      var2 / mvar*0.d0 /
 
 c
 c     include file for common block and variable definition LSQ 
@@ -190,12 +198,12 @@ c
 
       character phcd1(mphas)*8,phcd2(mphas)*8,art*16, mtyp0*3
 
-      real*4 rzo,rdel,razi,rzo1,rzo2,rdel1, rdelk
+      real*4    rzo,rdel,razi,rzo1,rzo2,rdel1, rdelk
 
-      logical first
-      real*4  zso
-      character modnamo*20
-      common /bkin0/first,modnamo,zso
+      logical   first
+      real*4    zso
+      character  modnamo*20
+      common    /bkin0/first,modnamo,zso
 
 c
 c     common blocks for local/regional models reside in the following 
@@ -212,7 +220,7 @@ c     parameter nmod is defined in modelg.h
 c
       dimension imodn(nmod)
       character*20 modnam(nmod), modn
-      logical modflag(nmod)
+      logical   modflag(nmod)
 
       character cmod*1
 c
@@ -246,7 +254,7 @@ c
      +          typctlm, y00, mon00, d00, h00, idetyp, json_rc
 
       character mm*4,name*48
-      real*8    lat,lon,kmdel,dlati,dloni,ddepi, elevs, dazir, cpq, cpq2
+      real*8    lat,lon,dlati,dloni,ddepi, elevs, dazir, cpq, cpq2
       real*4    sec, rlat, rlon, smag
 
       character title*140, czo*1, region*80, czo1*1, magtypp*3, cfix*8,
@@ -254,9 +262,9 @@ c
      +          cfi*1, downw*4
 
 c
-c     idtmax = number of different travel-time-difference definitions
-c              used for calculating a initial value for the source time
-c              by using the Wadati-approach
+c     idtmax =  number of different travel-time-difference definitions
+c               used for calculating a initial value for the source time
+c               by using the Wadati-approach
 c
       parameter (idtmax = 4)
 
@@ -265,9 +273,12 @@ c
      +          vpvss(idtmax),datho(mread),datla(mread),datlo(mread),
      +          ttt(mread),tttr(mread)
 
+      data      idt / idtmax*0 /
+
       logical   zoflag , vlflag  , stcorfl, iloc, surf, surff, surfm,
-     +          diffflag, dtmflag, epistart, single , output, modout, 
-     +          last, magflag, lastfixi, direct, plflag, wflag,
+     +          diffflag, dtmflag, epistart0, single , output, modout, 
+     +          last, magflag, lastfixi, direct, wflag, epistart,
+     +          lbcross, ldcross, plflag, lrasol,
      +          conr, rayok, rayokf, aziini, aziall,
      +          kmout, thbaz, thray, tresw, lastfixt, lastfixm,
      +          mttres, isf_in, isf_out, unc_out, fixinp, lsmu, 
@@ -275,16 +286,61 @@ c
      +          aziflag, sloflag, gapobs, isf_epi, isf_dep, isf_all, 
      +          new_in, lgsurf, rgsurf, tsurf, lpsurf, isurf,
      +          lrmsisc, firston, firstph, first2, azionlyf, ldepth0,
-     +          old_syntax, emerout, larid, fsetloc, ldefd(3), ldefisc,
+     +          old_syntax, emerout, larid, ldefd(3), ldefisc,
      +          lcomfix, primef, lstcor, ftvar, favar, fsvar, fdtvar,
      +          ftw, faw, fsw, fdtw, fth, fah, fsh, fdth, eflag, fconr,
-     +          fmoho, ldist, llimdel, lwdepth, json_out, lauto, lautot,
-     +          lautor, l_noepi, lwater, lmaxm, lpick
+     +          fmoho, ldist, llimdel, lwdepth, json_out, lauto,
+     +          lwater, lmaxm, lpick, toreset
+c
+c     lloc = logical to indicate the diferent starting-solution options
+c            (initial epicenter) set if:
+c
+c       lloc(.) =  .true. if
+c
+c       lloc(1) = epicenter estimated from backazimuth observations
+c       lloc(2) = epicenter estimated from at least 3 observed station 
+c                 distances
+c       lloc(3) = epicenter calculated from classical regional array
+c                 approach: 1 BAZ and 1 observed distance at one station
+c                 (may also work for a 3C station)
+c       lloc(4) = epicenter set in hyposat-parameter file
+c       lloc(5) = epicenter set by ISF input file
+c
+c       lloc(6) = epicenter based on BAZ information 
+c       lloc(7) = epicenter based on distance information
+c 
+c       lloc(8) = epicenter set after plane-wave fit
+c
+c       lloc(9) = epicenter set in network center
+c
+c       lloc(10) = epicenter set near closest station
+c
+c     stlat(), stlon(), stlats() & stlons() are the corresponding 
+c     epicenters in geographic coordinates and their uncertainties
+c
 
+      parameter (nstsol = 10, nstsol4 = 4*nstsol)
+      logical   lloc(nstsol)
+      dimension stlat(nstsol), stlon(nstsol), stlats(nstsol), 
+     +          stlons(nstsol)
+      data      lloc / nstsol*.false./
+      data      stlat, stlon, stlats, stlons / nstsol4*-99.d0 /
 c
 c     some constants and initial or default values
 c
+      character arg*2
+      icom = command_argument_count()
 
+      if(icom.gt.0) then
+         call getarg(1,arg)
+         if(arg.eq.'-v') then
+           print*,trim(version), trim(vdate)
+           go to 99999
+         endif
+         print *,' WRONG argument for HYPOSAT'
+         go to 99999
+      endif
+ 
       first = .true. 
       zso   = 0. 
       modnamo = '                    '
@@ -318,7 +374,7 @@ c
       dismin  = pi
 
       ttray   = 0.d0
-      ddel    = 0.d0
+      ddel    = -999.d0
 
       dchang0 = 1.d0
 
@@ -327,7 +383,6 @@ c
       rmso    = 9999.d0
       rms1    = 0.d0
       rmsold  = 9999.d0
-      datmax0 = 9999.d0
       nrms1   = 0
 
       miteras = 0
@@ -345,6 +400,8 @@ c
       imaxiter  = 0
       ilastiter = 0
       mosci     = 4
+
+      toreset =  .false.
       
       cevid  = '9999999999'
       corid  = '_'
@@ -356,19 +413,15 @@ c
       stcorfl  = .false.
       diffflag = .true.
       iloc     = .false.
-      epistart = .false.
+      epistart0 = .false.
       lauto    = .false.
-      lautot   = .false.
-      lautor   = .false.
       lpick    = .false.
-      l_noepi  = .false.
-      fsetloc  = .false.
       single   = .false.
       output   = .false.
       json_out = .false.
       isf_in   = .false.
       isf_out  = .false.
-      unc_out = .false.
+      unc_out  = .false.
       isf_epi  = .false.
       isf_dep  = .false.
       isf_all  = .false.
@@ -378,6 +431,9 @@ c
       lastfixt = .false.
       lastfixm = .false.
       plflag   = .true.
+      lbcross  = .true.
+      ldcross  = .true.
+      lrasol   = .true.
       dtmflag  = .false.
       rayok    = .false.
       rayokf   = .false.
@@ -406,106 +462,111 @@ c
       aziflag  = .true.
       azionlyf = .false.
       sloflag  = .true.
-      gapobs  = .false.
-      firstph = .false.
-      emerout = .false.
-      lcomfix = .false.
-      ldefd(1)= .false.
-      ldefd(2)= .false.
-      ldefd(3)= .false.
-      ldefisc = .false.
+      gapobs   = .false.
+      firstph  = .false.
+      emerout  = .false.
+      lcomfix  = .false.
+      ldefd(1) = .false.
+      ldefd(2) = .false.
+      ldefd(3) = .false.
+      ldefisc  = .false.
 
-      ftvar   = .false.
-      favar   = .false.
-      fsvar   = .false.
-      fdtvar  = .false.
+      ftvar    = .false.
+      favar    = .false.
+      fsvar    = .false.
+      fdtvar   = .false.
 
-      ftw     = .false.
-      faw     = .false.
-      fsw     = .false.
-      fdtw    = .false.
+      ftw      = .false.
+      faw      = .false.
+      fsw      = .false.
+      fdtw     = .false.
 
-      fth     = .false.
-      fah     = .false.
-      fsh     = .false.
-      fdth    = .false.
+      fth      = .false.
+      fah      = .false.
+      fsh      = .false.
+      fdth     = .false.
 
-      ldepth0 = .false.
-      lwdepth = .false.
-      lwater  = .false.
-      zwater  = 0.d0
+      ldepth0  = .false.
+      lwdepth  = .false.
+      lwater   = .false.
+      zwater   = 0.d0
 
-      ldist   =  .false.
+      ldist    =  .false.
 
-      ideptyp = 1
-      c1typ   = 'mc'
+      ideptyp  = 1
+      c1typ    = 'mc'
 
-      lrmsisc = .false.
+      lrmsisc  = .false.
 
-      modnamo = '_'
-      mtyp   = 'C10'
-      mtyp0  = 'E6 '
+      modnamo  = '_'
+      mtyp     = 'C10'
+      mtyp0    = 'E6 '
 
       modnam(1) = 'ak135_A'
       modflag(1) = .true.
-      imodn(1) = 1
+      imodn(1)  = 1
       mtype(1)  = mtyp0
+      imo       = 0
 
       do i=2,nmod
-         modnam(i) = modnam(1)
-         imodn(i) = 0
-         mtype(i)  = mtype(1)
+         modnam(i)  = modnam(1)
+         imodn(i)   = 0
+         mtype(i)   = mtype(1)
          modflag(i) = .false.
       enddo
 
-      rmax = 0.d0
-      rmax0 = 0.d0
-      filloc = '_'
-      imo     = 0
+      rmax   = 0.d0
+      rmax0   = 0.d0
+
+      filloc      = '_'
       stationfile = 'stations.dat'
       statfile2   = 'stations.dat'
+      statcorfile = ' '
       outputfile  = 'hyposat-out'
       inputfile   = 'hyposat-in'
-      isf_file = 'ISF'
-      json_file = 'JSON'
-      json_rc = 0
-      json_prec = 12
-      old_syntax = .false.
-      statcorfile = ' '
+      isf_file    = 'ISF'
+      json_file   = 'JSON'
+      json_rc     = 0
+      json_prec   = 12
+
+      old_syntax  = .false.
+
       istcor = 0
-      vpl = 5.8d0
-      vsl = 3.46d0
-      zo1 =  0.d0
-      sdzo1 = 50.d0
-      czo = 'F'
+      vpl    = 5.8d0
+      vsl    = 3.46d0
+      zo1    =  0.d0
+      sdzo0  = 50.d0
+      czo    = 'F'
       depthmin = 0.d0
       depthmax = 800.d0
       maxiter = 80
-      confl = 68.26895d0
+      confl   = 68.26895d0
       iellipi = 1
-      dazim0 = 50.d0
-      dpam0 = 10.d0
-      typctl = 4
-      islow = 1
+      dazim0  = 50.d0
+      dpam0   = 10.d0
+      typctl  = 4
+      islow   = 1
       setcheck1 = -999.d0
-      setcheck  = 1.d0
+      setcheck = 1.d0
       thrfixi0 = 0.005d0
-      indph0 = 3333
-      epilat0 = -999.d0
-      epilon0 = -999.d0
-      sdlatg0  = 10.d0
-      sdlatgi0 = 10.d0
-      sdlat0   = -10.d0
+      indph0   = 3333
+      epilat0  = -999.d0
+      epilon0  = -999.d0
+      sdlat0   = 10.d0
+      sdlat0g  = 10.d0
+      sdlati0  = 10.d0
       sdlon0   = 10.d0
       sdloni0  = 10.d0
-      tome0   = -2840140801.d0
-      stome0  = 120.d0
-      wadmin  = 0.d0
-      wadmax  = 300.d0
+      tome0    = -2840140801.d0
+      stome0   = 120.d0
+      wadmin   = 0.d0
+      wadmax   = 300.d0
       dismaxst = 180.d0
       disminst = -1.d0
 
-      iwl = 0
+      ttdmin = 2.0d0
+
+      iwl  = 0
       dtdw = 2.d0
 
       elmax  = -999.d0
@@ -533,10 +594,6 @@ c
       smsgu = -9.d0 
       smlgu = -9.d0 
       lsmu  =  .false.
-      var2(1) = 0.d0
-      var2(2) = 0.d0
-      var2(3) = 0.d0
-      var2(4) = 0.d0
 
       phidr0   = ' '
       string   = ' '
@@ -578,11 +635,11 @@ c
       delmlmin = 0.d0
       delmlmax = 20.d0
 
-      magtypp  = 'G-R'
-      magtyps  = 'IASPEI'
-      magtypml = 'Bath'
+      magtypp   = 'G-R'
+      magtyps   = 'IASPEI'
+      magtypml  = 'Bath'
       magmlfile = 'MLCORR.TABLE'
-      lmaxm    = .true.
+      lmaxm     = .true.
 
       treswf   = 1.d0
 
@@ -611,6 +668,9 @@ c
       if(string(1:1).eq.'*') go to 1
       if(string(1:1).eq.'?') go to 1
 
+      chgcas = uppcas(string(1:7))
+      if(chgcas(1:7).eq.'HYPOSAT') go to 1
+
       icolon = index(string,':')
 
       if(icolon.gt.0) then
@@ -618,12 +678,12 @@ c
          chgcas = uppcas(string(1:icolon1))
          string(1:icolon1) = chgcas(1:icolon1)
       else 
-         print *,' Wrong syntax (ignored): ',trim(string)
+         print *,' hyposat-parameter file input error: ',trim(string)
          go to 1
       endif
 
       if(string(icolon+1:icolon+1).ne.' ') then
-         print *,' Wrong syntax (ignored): ',trim(string)
+         print *,' hyposat-parameter file input error: ',trim(string)
          go to 1
       endif
 
@@ -804,6 +864,34 @@ c
           go to 1
       endif
 
+      if(string(1:27).eq.'NO REG ARRAY START SOLUTION') then
+          intinp = 0
+          read (string(icolon2:),*) intinp
+          if(intinp.eq.1) lrasol = .false.
+          go to 1
+      endif
+
+      if(string(1:15).eq.'NO BAZ CROSSING') then
+          intinp = 0
+          read (string(icolon2:),*) intinp
+          if(intinp.eq.1) lbcross = .false.
+          go to 1
+      endif
+
+      if(string(1:20).eq.'NO DIST CIRCLE CROSS') then
+          intinp = 0
+          read (string(icolon2:),*) intinp
+          if(intinp.eq.1) ldcross = .false.
+          go to 1
+      endif
+
+      if(string(1:20).eq.'NO PLANE WAVE APPROX') then
+          intinp = 0
+          read (string(icolon2:),*) intinp
+          if(intinp.eq.1) plflag = .false.
+          go to 1
+      endif
+
       if(string(1:17).eq.'PLANE WAVE APPROX') then
           intinp = 0
           read (string(icolon2:),*) intinp
@@ -897,14 +985,17 @@ c
      +   string(1:18).eq.'DOWNWEIGHTING TASD') then
           downw = ' '
           read (string(icolon2:),'(a4)') downw
+
           if(downw(1:1).eq.'1') ftvar = .true.
           if(downw(2:2).eq.'1') favar = .true.
           if(downw(3:3).eq.'1') fsvar = .true.
           if(downw(4:4).eq.'1') fdtvar = .true.
+
           if(downw(1:1).eq.'2') ftw   = .true.
           if(downw(2:2).eq.'2') faw   = .true.
           if(downw(3:3).eq.'2') fsw   = .true.
           if(downw(4:4).eq.'2') fdtw   = .true.
+
           if(downw(1:1).eq.'3') fth   = .true.
           if(downw(2:2).eq.'3') fah   = .true.
           if(downw(3:3).eq.'3') fsh   = .true.
@@ -919,8 +1010,8 @@ c
 
       if(string(1:26).eq.'STARTING DEPTH UNCERTAINTY' .or.
      +   string(1:20).eq.'STARTING DEPTH ERROR') then
-          read (string(icolon2:),*) sdzo1
-          if(sdzo1.eq.0.d0) sdzo1 = 50.d0
+          read (string(icolon2:),*) sdzo0
+          if(sdzo0.eq.0.d0) sdzo0 = 50.d0
           go to 1
       endif
 
@@ -977,28 +1068,6 @@ c
           go to 1
       endif
 
-      if(string(1:25).eq.'AUTOMATIC PROCESSING TELE') then
-          intinp = 0
-          lautot = .false.
-          read (string(icolon2:),*) intinp
-          if(intinp.eq.1) then
-             lpick = .true.
-             lautot  = .true.
-          endif
-          go to 1
-      endif
-
-      if(string(1:29).eq.'AUTOMATIC PROCESSING REGIONAL') then
-          intinp = 0
-          lautot = .false.
-          read (string(icolon2:),*) intinp
-          if(intinp.eq.1) then
-             lpick = .true.
-             lautor  = .true.
-          endif
-          go to 1
-      endif
-
       if(string(1:20).eq.'AUTOMATIC PROCESSING') then
           intinp = 0
           lauto  = .false.
@@ -1006,8 +1075,6 @@ c
           if(intinp.eq.1) then
              lpick = .true. 
              lauto   = .true.
-             lautot  = .true.
-             lautor  = .true.
           endif
           go to 1
       endif
@@ -1019,13 +1086,13 @@ c
             go to 1
           endif
           read (string(icolon2:),*) abc
-          if(abc.ge.-90.d0 .and. abc.le.90.d0) epilat0 = abc
+          if(dabs(abc).le.90.d0) epilat0 = abc
           go to 1
       endif
 
       if(string(1:29).eq.'STARTING LATITUDE UNCERTAINTY' .or.
      +   string(1:23).eq.'STARTING LATITUDE ERROR') then
-          read (string(icolon2:),*) sdlatgi0
+          read (string(icolon2:),*) sdlati0
           go to 1
       endif
 
@@ -1036,7 +1103,7 @@ c
             go to 1
           endif
           read (string(icolon2:),*) abc
-          if(abc.ge.-180.d0 .and. abc.le.180.d0) epilon0 = abc
+          if(dabs(abc).le.180.d0) epilon0 = abc
           go to 1
       endif
 
@@ -1351,7 +1418,7 @@ c
       if(string(1:12).eq.'OUTPUT LEVEL') then
           read (string(icolon2:),*) typctl
           typctlm = typctl
-          if(typctl.lt.-1)   typctl = 0
+          if(typctl.lt.-1)   typctl = -1
           if(typctl.ge.40)  typctl = 4
           if(typctl.gt.10) then
              itypn = mod(typctl,10)
@@ -1396,6 +1463,11 @@ c
           diffflag = .true.
           read (string(icolon2:),*) intinp
           if(intinp.ne.1) diffflag = .false.
+          go to 1
+      endif
+
+      if(string(1:34).eq.'MIN ALLOWED TRAVEL-TIME DIFFERENCE') then
+          read (string(icolon2:),*) ttdmin
           go to 1
       endif
 
@@ -1847,14 +1919,14 @@ c
       if(string(1:26).eq.'REFERENCE SOURCE LONGITUDE') then
           abc = -999.0d0
           read (string(icolon2:),*) abc
-          if(abc.ge.-180.d0 .and. abc.le.180.d0) dloni = abc
+          if(dabs(abc).le.180.d0) dloni = abc
           go to 1
       endif
 
       if(string(1:25).eq.'REFERENCE SOURCE LATITUDE') then
           abc = -999.0d0
           read (string(icolon2:),*) abc
-          if(abc.ge.-90.d0 .and. abc.le.90.d0) dlati = abc
+          if(dabs(abc).le.90.d0) dlati = abc
           go to 1
       endif
 
@@ -1875,7 +1947,7 @@ c
 
       if(output) then
          open (unit=11,file=outputfile)
-         write (11,'(a,/)') trim(cprog)
+         write (11,'(a,/)') trim(version)
          write (11,'(''Event solution by '',a,/)') 
      +          trim(author)
       endif
@@ -1885,8 +1957,8 @@ c
       endif
 
       if(kmout) then
-        dismaxst = dismaxst * 111.5d0
-        disminst = disminst * 110.5d0
+        dismaxstk = dismaxst * 111.19d0
+        disminstk = disminst * 111.19d0
       endif
 
       if(isf_out) then
@@ -1960,10 +2032,10 @@ c
          print *,'vlr = ',vlr
          print *,'vt  = ',vt 
          print *,'zo1   = ',zo1
-         print *,'sdzo1 = ',sdzo1
+         print *,'sdzo0 = ',sdzo0
          print *,'czo   = ',czo
          print *,'epilat0 = ',epilat0
-         print *,'sdlatgi0  = ',sdlatgi0
+         print *,'sdlati0  = ',sdlati0
          print *,'epilon0 = ',epilon0
          print *,'sdloni0   = ',sdloni0
          print *,'maxiter = ',maxiter
@@ -2144,12 +2216,22 @@ c
       if(czo.ne.'F' .and. czo.ne.'D' .and. czo.ne.'B' ) czo='F'
       zo = zo1
 
-      if(epilat0.ge.-90.d0 .and. epilon0.ge.-180.0d0 .and.
-     +   epilat0.le.90.d0 .and. epilon0.le.180.0d0 ) epistart = .true.
+      if(dabs(epilat0).le.90.d0 .and. dabs(epilon0).le.180.d0) then
+         epistart0 = .true.
+         lloc(4) = .true.
+         stlat(4) = epilat0
+         stlon(4) = epilon0
+         stlats(4) = sdlati0
+         stlons(4) = sdloni0
 
-      do 3 i=1,mstat
-      sta(i) = ' '
-3     continue
+         if(typctl.gt.3) then
+            print*,'Initial Epicenter set by parameter file:'
+            print*,'Epicenter lat:',epilat0,'+/-',sdlati0,'[deg]'
+            print*,'Epicenter lat:',epilon0,'+/-',sdloni0,'[deg]'
+         endif
+
+      endif
+
 
 c
 c     read in all available observed data
@@ -2200,8 +2282,8 @@ c
             go to 33
          endif
 
-331      rlati = 0.
-         rloni = 0.
+331      rlati = -999.
+         rloni = -999.
          rdepi = 0.
          itest = read_origin(string(1:136),yyi,moni,ddi,hh,mi,isec,msec,
      +           cdum,rdum,rdum,rlati,rloni,cdum,rdum,rdum,idum1,rdepi,
@@ -2235,11 +2317,34 @@ c
          call fhtoe(timeoi,jdate,yyi,moni,mm,ddi,idoy,hh,mi,sec)
 
          if(isf_epi) then
-            epilat0 = dlati
-            epilon0 = dloni
-            tome0   = timeoi
-            epistart = .true.
+            if(dabs(dlati).le.90.d0 .and. dabs(dloni).le.180.d0) then
+
+               epistart0 = .true.
+
+               tome0   = timeoi
+
+               lloc(5) = .true.
+               stlat(5) = dlati
+               stlon(5) = dloni
+               stlats(5) = sdlati0
+               stlons(5) = sdloni0
+
+               if(typctl.gt.3) then
+                  print*,'Initial Epicenter set by input ISF file:'
+                  print*,'Epicenter lat:',dlati,'+/-',sdlati0,'[deg]'
+                  print*,'Epicenter lon:',dloni,'+/-',sdloni0,'[deg]'
+               endif
+
+            else
+
+               print *,'no valid location from ISF input file lat:',
+     +                 dlati,' lon:',dloni
+               ref_eve =  .false.
+
+            endif
+
          endif
+
          if(isf_dep) then
             zo1     = ddepi
             if(zo1.lt.depthmin) zo1=depthmin
@@ -2259,7 +2364,10 @@ c           itest = write_isf_error(typctl)
          if(output) write (11,'(a,/)') trim(title)
          if(json_out) call json_add_string('description',
      +       trim(title), json_rc)
-         print *,'EVENT ',trim(title)
+         if(typctl.ge.0) then
+            print *,'EVENT ',trim(title)
+            print *,' '
+         endif
       endif
 
       timemin = 9999999999.d0
@@ -2279,6 +2387,8 @@ c           itest = write_isf_error(typctl)
       sdsmean = 0.d0
       nsds    = 0
       sdmeans = 0.d0
+
+      larid = .false.
 
       ii = 0
       string = ' '
@@ -2790,7 +2900,7 @@ c     print*, timeo,jdate,yy,mon,mm,dd,idoy,hh,mi,sec
             chgcas = uppcas(phidd(3:3))
             if(chgcas.eq.'L') phase(ii) = 'AML'
             if(chgcas.eq.'S') phase(ii) = 'AMs'
-            if(chgcas.eq.'B') phase(ii)(1:2) = 'Amb'
+            if(chgcas.eq.'B') phase(ii) = 'Amb'
             go to 63
          endif
       endif
@@ -2872,7 +2982,7 @@ c     print*, timeo,jdate,yy,mon,mm,dd,idoy,hh,mi,sec
         iev(ii) = j
         go to 11
 
-      else if(sta(j).eq.' ') then
+      else if(sta(j).eq.'     ') then
 
         call get_station(stationfile,stat,jdate,lat,lon,
      +                   elevs,name,ierr)
@@ -2953,6 +3063,7 @@ c       print *,vlflag,vp,vs
 
         sta(j)   = stat
         stala(j) = lat
+        stalag(j)= convlat(lat,1)
         stalo(j) = lon
         stael(j) = elevs/1000.d0
         stavp(j) = vp
@@ -2966,12 +3077,12 @@ c       print *,vlflag,vp,vs
         istfil(j) = ifil
         istaph(j) = 0
         istad(j)  = 0
-        stalam = stalam + convlat(lat,1)
+        stalam = stalam + stala(j)
         p1 = deg2rad*lon
         stalom1 = stalom1 + dcos(p1)
         stalom2 = stalom2 + dsin(p1)
         iev(ii) = j
-        istat = j
+        nstat = j
 
         go to 11
 
@@ -3036,6 +3147,8 @@ c
      +             touse(ii)(8:8) = 'P'
       if(phase(ii)(1:4).eq. 'Pdif') touse(ii)(8:8) = 'P'
 
+      if(arid(ii).ne.'        ') larid = .true.
+
       if(typctl.gt.8) then
          print *,ii,stat,tt(ii),phase(ii),azi(ii),azis(ii),p(ii),ps(ii),
      +           touse(ii)
@@ -3067,6 +3180,8 @@ c     end of onset reading loop
 
       endif
 
+      nobs  = ii
+      if(nobs.le.3) fixinp = .true.
 
       if(nobsst.gt.0) then
          terrm = terrm / dble(nobsst)
@@ -3075,16 +3190,25 @@ c     end of onset reading loop
       endif
       terrm = terrm * 10.d0 
 
-      nobs  = ii
+c
+c     find the center of the station net
+c
+      if(nstat.gt.1) then
+         stalam  = stalam / dble(nstat)
+         stalom1 = stalom1 / dble(nstat)
+         stalom2 = stalom2 / dble(nstat)
+         stalom  = rad2deg*datan2(stalom2,stalom1)
 
-      if(nobs.le.3) fixinp = .true.
+         lloc(9) = .true.
+         stlat(9) = stalam
+         stlon(9) = stalom
+         stlats(9) = sdlati0
+         stlons(9) = sdloni0
+      endif
 
-      nstat = istat
-      stalam  = stalam / dble(nstat)
-      stalom1 = stalom1 / dble(nstat)
-      stalom2 = stalom2 / dble(nstat)
-      stalom  = rad2deg*datan2(stalom2,stalom1)
-
+c
+c     get mean ucertainties of onset times
+c
       if(nsdp.gt.0) then
          sdmeans = sdpmean
          sdpmean = 4.d0*dsqrt(sdpmean / dble(nsdp))
@@ -3107,6 +3231,9 @@ c     end of onset reading loop
          sdmeans = 5.d0
       endif
 
+c
+c     check for multiple onset entries
+c
       if(check_mult) then
          nobs0 = nobs
          call mult_ons(nobs,nobs0,iev,phase,tt,tts,tt2,azi,azis,p,ps,
@@ -3114,10 +3241,9 @@ c     end of onset reading loop
          if(nobs.ne.nobs0) nobs = nobs0
       endif
 
-      if(nobs.eq.1) then
+      if(nstat.eq.1) then
 
          rzo1  = 0.
-
          rdel1 = 3.
          call tauget_mod(rzo1,rdel1,nphas,phcd,ttc,dtdd,
      +                   dtdh,dddp,modnam(1))
@@ -3125,36 +3251,72 @@ c     end of onset reading loop
 
          single = .true.
 
-         if(typctl.gt.4) print *, 'Case: single array observation!'
+         if(typctl.gt.4) print *, 'Case: single station/array',
+     +      ' observation!'
 
       endif
 
 c
-c     Fix the time system at the earliest onset time for this event.
+c     fix the time system at the earliest onset time for this event.
 c
 
-c     print *,istatmin,sta(iev(istatmin)),timemin
-      larid = .false.
-      iazin = 0
       do 15 i = 1,nobs
+
       tt(i) = tt(i)-timemin
       ttu(i) = tts(i)
-      if(azi(i).ge.0.d0) iazin = iazin+1
+
+      if(azi(i).gt.-900.d0 .and. touse(i)(2:2).eq.'A' .and.
+     +   index(phase(i),'pre').eq.0) then
+
+         iev1 = iev(i)
+         azi1 = azi(i)
+
+         if(index(phase(i),'KK').gt.0 .and. phase(j)(1:1).ne.'S' .and. 
+     +            phase(i)(1:2).ne.'sS')   azi1 = alpha2(azi1-180.d0)
+         if(index(phase(i),'P2K').gt.0) azi1 = alpha2(azi1-180.d0)
+         if(index(phase(i),'P3K').gt.0) azi1 = alpha2(azi1-180.d0)
+         if(index(phase(i),"P'P'").gt.0) azi1 = alpha2(azi1-180.d0)
+         if(index(phase(i),"S'S'").gt.0) azi1 = alpha2(azi1-180.d0)
+
+         azios(iev1) = azios(iev1) + dsin(deg2rad*azi1)
+         azioc(iev1) = azioc(iev1) + dcos(deg2rad*azi1)
+         nazio(iev1) = nazio(iev1) + 1
+         azism(iev1) = azism(iev1) + q2(azis(i))
+
+      endif
+
       if(typctl.gt.8) then
         print*,i,sta(iev(i)),phase(i),tt(i),tts(i),tt2(i),azi(i),azis(i)
-     +       ,p(i),ps(i),touse(i)
+     +       ,p(i),ps(i),touse(i),nazio(iev(i))
       endif
-      if(arid(i).ne.'        ') larid = .true.
+
 15    continue
 
-      if(epistart) then
-         elatmf  = convlat(epilat0,1)
-         elatmgf = epilat0
-         elonmf  = epilon0
+      if(lauto) then
+         epistart = .false.
+      else
+         epistart = epistart0
       endif
 
 c
-c     At first, let us try to calculate an epicenter from all 
+c     get mean baz observations for each station
+c
+
+      iazim = 0
+      do 16 i=1,nstat
+
+      if(nazio(i).gt.0) then
+         azios(i) = azios(i)/nazio(i)
+         azioc(i) = azioc(i)/nazio(i)
+         azism(i) = dsqrt(azism(i)/nazio(i))
+         aziom(i) = alpha2(rad2deg*datan2(azios(i),azioc(i)))
+         if(iazim.eq.0 .or. i.eq.istatmin) iazim = i
+      endif
+
+16    continue
+
+c
+c     At first, let us try to estimate an epicenter from all 
 c     available baz observations.
 c
 
@@ -3163,79 +3325,91 @@ c
       selo1 = 0.d0
       selo2 = 0.d0
       svlo  = 0.d0
-      azims = 0.d0
-      azimc = 0.d0
-      azimr = 0.d0
-      iazim = 0
+
       rpar  = 0.d0
-      istater = 0
+      rparp = 0.d0
+      rpars = 0.d0
+
+      istatp  = 0
+      istats  = 0
 
       jj = 0
-      ja = 0
+      nloc = 0
 
-      if(nobs.eq.1) then
-         if(azi(i).gt.-999.d0) then
-            azims = dsin(deg2rad*azi(1))
-            azimc = dcos(deg2rad*azi(1))
-            if(p(1).gt.0.d0) rpar = p(1)
+c
+c check of single array observation
+c
+      if(single .and. nazio(1).gt.0) then
+         do 17 i=1,nobs
+        
+            if(istatp.eq.0 .and. phase(i)(1:1).eq.'P' .and.
+     +         touse(i)(1:1).ne.' ') istatp = i
+
+            if(rparp.le.0.d0 .and. istatp.gt.0 .and. p(istatp).gt.0.d0) 
+     +         rparp = p(istatp)
+
+            if(istats.eq.0 .and. phase_type(phase(i)).eq.'S' .and.
+     +         touse(i)(1:1).ne.' ') istats = i
+
+            if(rpars.le.0.d0 .and. istats.gt.0 .and. p(istats).gt.0.d0) 
+     +         rpars = p(istats)
+
+17       continue
+
+         if(istatp.gt.0 .and. istats.le.0 .and. rparp.gt.0.d0) then
+            rpar = rparp
             iazim = 1
-            istataz = iev(1)
+            if(epistart) go to 72
+            go to 71
+         else if(istats.gt.0 .and. istatp.le.0 .and. rpars.gt.0.d0) then
+            rpar = rpars
+            iazim = 1
+            if(epistart) go to 72
+            go to 71
+         else if (istatp.gt.0 .and. istats.gt.0) then
+            if(rparp.gt.0.d0) rpar = rparp
+            iazim = 1
+            single = .false.
+            if(epistart) go to 72
             go to 51
          else
             print *,' Too little input data for a location'
+            if(output) write(11,'(''Too little input data'')')
             go to 9999
          endif
+      else if(single .and. nazio(1).eq.0) then
+            print *,' Too little input data for a location'
+            if(output) write(11,'(''Too little input data'')')
+            go to 9999
       endif
 
       if(azionlyf) typctl = 6
 
-      do 50 i=1,nobs-1
+      if(epistart) go to 72
 
-      if(touse(i)(2:2).ne.'A') go to 50
-      azi1 = azi(i)
-      if(index(phase(i),'pre').gt.0) go to 50
-      if(index(phase(i),'KK').gt.0 .and. phase(j)(1:1).ne.'S' .and. 
-     +         phase(i)(1:2).ne.'sS')   azi1 = alpha2(azi1-180.d0)
-      if(index(phase(i),'P2K').gt.0) azi1 = alpha2(azi1-180.d0)
-      if(index(phase(i),'P3K').gt.0) azi1 = alpha2(azi1-180.d0)
-      if(index(phase(i),"P'P'").gt.0) azi1 = alpha2(azi1-180.d0)
-      if(index(phase(i),"S'S'").gt.0) azi1 = alpha2(azi1-180.d0)
+      do 50 i=1,nstat-1
 
-      azims = azims + dsin(deg2rad*azi1)
-      azimc = azimc + dcos(deg2rad*azi1)
-      iazim = iazim + 1
-      istataz = iev(i)
+      if(nazio(i).le.0) go to 50
 
-      slat1  = stala(iev(i))
-      slat1e = convlat(slat1,1)
-      slon1  = stalo(iev(i))
+      azi1 = aziom(i)
+      dazi1 = azism(i)
 
-      do 20 j=i+1,nobs
+      slat1  = stala(i)
+      slat1e = stalag(i)
+      slon1  = stalo(i)
 
-      if(touse(j)(2:2).ne.'A') go to 20
-      azi2 = azi(j)
-      if(index(phase(j),'pre').gt.0) go to 20
-      if(index(phase(j),'KK').gt.0 .and. phase(j)(1:1).ne.'S' .and. 
-     +         phase(j)(1:2).ne.'sS')   azi1 = alpha2(azi1-180.d0)
-      if(index(phase(j),'P2K').gt.0) azi2 = alpha2(azi2-180.d0)
-      if(index(phase(j),'P3K').gt.0) azi2 = alpha2(azi2-180.d0)
-      if(index(phase(j),"P'P'").gt.0) azi2 = alpha2(azi2-180.d0)
-      if(index(phase(j),"S'S'").gt.0) azi2 = alpha2(azi2-180.d0)
+      do 20 j=i+1,nstat
 
-      if(i.eq.nobs-1 .and. j.eq.nobs) then
-         azims = azims + dsin(deg2rad*azi2)
-         azimc = azimc + dcos(deg2rad*azi2)
-         iazim = iazim + 1
-         istataz = iev(i)
-      endif
-      if(iev(i).eq.iev(j)) go to 20
+      if(nazio(j).le.0) go to 50
 
-      slat2  = stala(iev(j))
-      slon2  = stalo(iev(j))
+      azi2 = aziom(j)
+      dazi2 = azism(j)
 
+      slat2  = stala(j)
+      slon2  = stalo(j)
+
+c     index number of BAZ crossings
       jj = jj + 1
-      ja = ja + 1
-
       if(jj.gt.mloc) then
          print *,'Something wrong with number of locations!'
          go to 9999
@@ -3245,32 +3419,34 @@ c
 
          print *,' '
          print *,'    Station BAZ                       dBAZ' 
-         print *,'(1) ',sta(iev(i)),azi1,azis(i)
-         print *,'(2) ',sta(iev(j)),azi2,azis(j)
+         print *,'(1) ',sta(i),azi1,dazi1
+         print *,'(2) ',sta(j),azi2,dazi2
 
       endif
 
 c
 c     Calculate distance and angles between the 2 stations
+c     (only if not the same as the last station)
 c
 
       call depi (slat1,slon1,slat2,slon2,del3,dk,ep2,ep1,d2km)
 
-c     if(typctl.gt.7) then
-c        print *,'station 1 (lat,lon,distance [km,deg],azimuth: ',
-c    +           slat1,slon1,dk,del3,ep1
-c        print *,'station 2 (lat,lon,azimuth; ',slat2,slon2,ep2
-c     endif
+      if(typctl.gt.7) then
+         print *,'station 1 (lat,lon,distance [km,deg],azimuth: ',
+     +           slat1,slon1,dk,del3,ep1
+         print *,'station 2 (lat,lon,azimuth; ',slat2,slon2,ep2
+      endif
 
 c
-c     Now an initial epicenter will be calculated
+c     Now a possible BAZ crossing will be calculated
 c
-
       ierr = 0
-      call hyposat_cross(slat1e,slon1,azi1,azis(i),
-     +               azi2,azis(j),del3,ep1,ep2,ela(jj),elas(jj),
-     +               elo(jj),elos(jj),dismin,typctl,ierr)
+      call hyposat_cross(slat1e,slon1,azi1,dazi1,azi2,dazi2,del3,
+     +     ep1,ep2,ela(jj),elas(jj),elo(jj),elos(jj),dismin,typctl,ierr)
 
+c
+c     check if crossing succesful
+c
       if(ierr.gt.0) then
          jj = jj - 1
          go to 20
@@ -3286,26 +3462,450 @@ c
       selo2  = selo2 + dsin(p1)*p2
       svlo   = svlo  + p2
 
-      if(lauto) l_noepi = .true.
-      if(dismin.lt.0.166d0*pi .and. lautor) l_noepi = .true.
-      if(dismin.gt.0.1d0*pi .and. lautot) l_noepi = .true.
-
 20    continue
 50    continue
 
-51    nloc = jj
+      nloc = jj
 
+      if(.not.lbcross) go to 51
+c
+c     Now mean source coordinates from the BAZ crossings 
+c     have to be calculated.
+c
 
-      if(nloc.eq.0) then
+      if(nloc.gt.0) then
 
-        if(ja.gt.0) istater = 1
+         elatmdg = sela / svla
+         elatmdr = deg2rad*elatmdg
+         elatmd  = convlat(elatmdg,2)
+         elonmd  = rad2deg*datan2(selo2/svlo,selo1/svlo)
 
-        if(rpar .gt. 0.d0) then
+         if(nloc.eq.1 ) then
+
+           sdlat0  = elas(1)
+           sdlon0  = elos(1)
+
+         else if(nloc.gt.1) then
+
+           dla = 0.d0
+           dlo = 0.d0
+           do 60 i =1,nloc
+              dla = dla + q2(ela(i)-elatmd) / elas(i)
+              p1 = alpha1(elo(i)-elonmd)
+              dlo = dlo + q2(p1) / elos(i)
+60         continue
+
+           if(dabs(dla).le.epsilon) then
+             sdlat0  = elas(1)
+           else
+             sdlat0  = dsqrt(dla / svla)
+           endif
+           if(dabs(dlo).le.epsilon) then
+             sdlon0  = elos(1)
+           else
+             sdlon0  = dsqrt(dlo / svlo)
+           endif
+
+         endif
+
+         dismind = dismin * rad2deg * 5.d-2
+         if(sdlat0 .gt. dismind) sdlat0  = dismind
+         if(sdlon0 .gt. dismind) sdlon0  = dismind
+
+         lloc(1) = .true.
+         stlat(1) = elatmd
+         stlon(1) = elonmd
+         stlats(1) = sdlat0 / (eps*q2(dcos(elatmdr))+q2(dsin(elatmdr)))
+         stlons(1) = sdlon0
+
+         if(typctl.gt.3)  then
+           print *,'Mean epicenter calculated from',nloc,
+     +             ' backazimuth-observation pairs'
+           print *,'Mean epicenter lat:',elatmd,'+/-',stlats(1),'[deg]'
+           print *,'Mean epicenter lon:',elonmd,'+/-',stlons(1),'[deg]'
+         endif
+
+      endif
+
+c
+c     Which travel-time differences between S and P onsets do we have?
+c
+c     These travel differences are later used for the Wadati approch 
+c     to estimate a source time and to estimate station-source distances
+c     for a preliminary source location.
+c
+
+51    continue 
+
+      do 702 i = 1,nobs-1
+
+      if(touse(i)(1:1).ne.'T') go to 702
+
+      do 701 j = i+1,nobs
+
+      if(touse(j)(1:1).ne.'T') go to 701
+
+      delkm1 = 0.d0
+
+      if(iev(i).eq.iev(j)) then
+
+         phai = phase(i)
+         phaj = phase(j)
+
+         dtwad = dabs(tt(j)-tt(i))
+         dtswad = tts(j)+tts(i)
+
+         if(stcorfl) then
+            st1=0.d0
+            st2=0.d0
+            if(phase_type(phase(i)).eq.'P') st1 = statp(iev(i))
+            if(phase_type(phase(i)).eq.'S') st1 = stats(iev(i))
+            if(phase_type(phase(j)).eq.'P') st2 = statp(iev(j))
+            if(phase_type(phase(j)).eq.'S') st2 = stats(iev(j))
+            dtwad = dtwad + st1 - st2
+         endif
+
+        iwad = 0
+        wadati = .true.
+        if(dtwad.gt.wadmax) wadati = .false.
+        if(dtwad.lt.wadmin) wadati = .false.
+
+        if((phai.eq.'P       ' .and. phaj.eq.'S       ') .or.
+     +     (phai.eq.'S       ' .and. phaj.eq.'P       ')) then
+
+          if(wadati) iwad = 1
+            
+          delkm1 = (dtwad/60.d0-1.d0)*1000.d0
+          delkms1 = dtswad/6.d0*100.d0
+          if(delkm1.le.2000.d0) then
+             delkm1 = dtwad*10.2d0
+             delkms1 = dtswad*10.2d0
+          endif
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(delkms1)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if(( phai.eq.'P1      ' .and. (phaj.eq.'S1      ' .or.
+     +            phaj.eq.'Sg      '  .or. phaj.eq.'Sb      '  .or.
+     +            phaj.eq.'Sn      '  .or. phaj.eq.'S       '  .or.
+     +            phaj.eq.'Lg      '  )) .or.
+     +          ( phai.eq.'S1      ' .and. (phaj.eq.'P1      ' .or.
+     +            phaj.eq.'Pg      '  .or. phaj.eq.'Pb      '  .or.
+     +            phaj.eq.'Pn      '  .or. phaj.eq.'P       ' )) .or.
+     +          ((phai.eq.'Pg      '  .or. phai.eq.'Pb      '  .or. 
+     +            phai.eq.'Pn      '  .or. phai.eq.'P       ') .and. 
+     +            phaj.eq.'S1      ' ) .or.
+     +          ((phai.eq.'Sg      '  .or. phai.eq.'Sb      '  .or. 
+     +            phai.eq.'Sn      '  .or. phai.eq.'S       '  .or.
+     +            phai.eq.'Lg      ' ) .and. phaj.eq.'P1      ' ) ) then
+c
+c         For P1 and S1 it is not automatically known, which phase it will
+c         become. We use AK135 to choose the most
+c         presumable phase type for the Wadati Approach.
+c
+          idtc = 1
+          if(dtwad.lt.200.0d0) idtc = 3
+          if(dtwad.lt.17.6d0)  idtc = 2
+
+          if(wadati) iwad = idtc
+
+          if(idtc.eq.1) then
+             delkm1 = (dtwad/60.d0-1.d0)*1000.d0
+             delkms1 = dtswad/6.d0*100.d0
+             if(delkm1.le.2000.d0) then
+                delkm1 = dtwad*10.2d0
+                delkms1 = dtswad*10.2d0
+             endif
+          else if(idtc.eq.2) then
+             delkm1 = dtwad*8.58d0
+             delkms1 = dtswad*8.58d0
+          else if(idtc.eq.3) then
+             delkm1 = dtwad*10.2d0
+             delkms1 = dtswad*10.2d0
+          endif
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(delkms1)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if((phai.eq.'Pg      '                      .and.
+     +          (phaj.eq.'Sg      '.or.phaj.eq.'Lg      ')) .or.
+     +          (phaj.eq.'Pg      '                      .and.
+     +          (phai.eq.'Sg      '.or.phai.eq.'Lg      ')))then
+
+          if(wadati) iwad = 2
+
+          delkm1 = dtwad*8.58d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*8.58d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if((phai.eq.'Pn      '.and.phaj.eq.'Sn      ') .or.
+     +          (phaj.eq.'Pn      '.and.phai.eq.'Sn      '))then
+
+          if(wadati) iwad = 3
+
+          delkm1 = dtwad*10.2d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*10.2d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if((phai.eq.'Pb      '.and.phaj.eq.'Sb      ') .or.
+     +          (phaj.eq.'Pb      '.and.phai.eq.'Sb      '))then
+
+          if(wadati) iwad = 4
+
+          delkm1 = dtwad*9.47d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*9.47d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if(phai.eq.'Pn      '                          .and.
+     +      (phaj.eq.'Sg      '.or. phaj.eq.'Lg      ')) then
+
+          delkm1 = dtwad*6.02d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*6.02d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if(phaj.eq.'Pn      '                          .and.
+     +      (phai.eq.'Sg      '.or. phai.eq.'Lg      ')) then
+
+          delkm1 = dtwad*6.02d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*6.02d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if(phai.eq.'Pb      '                          .and.
+     +      (phaj.eq.'Sg      '.or. phaj.eq.'Lg      ')) then
+
+          delkm1 = dtwad*7.37d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*7.37d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        else if(phaj.eq.'Pb      '                          .and.
+     +      (phai.eq.'Sg      '.or. phai.eq.'Lg      ')) then
+
+          delkm1 = dtwad*7.37d0
+          delkm(iev(i)) = delkm(iev(i)) + delkm1
+          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*7.37d0)
+          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+
+        endif
+
+        if(iwad.gt.0) then
+
+          idt(iwad)           = idt(iwad) + 1
+          dt(iwad,idt(iwad))  = dtwad
+
+          if(phai(1:1).eq.'P') then
+             idtp(iwad,idt(iwad))= i
+             idts(iwad,idt(iwad))= j
+          else
+             idtp(iwad,idt(iwad))= j
+             idts(iwad,idt(iwad))= i
+          endif
+
+        endif
+
+      endif
+
+701   continue
+702   continue
+
+      if(lloc(1)) go to 72
+
+      if(.not.ldcross) go to 71
+
+      dtkm = -99.d0
+      nstc = 0
+      istdel = 0
+      do 705 i = 1,nstat
+        if(ndelkm(i).gt.0) then
+           nstc = nstc + 1
+           if((istdel.eq.0 .or. i.eq.istatmin) .and. 
+     +         nazio(i).ne.0) istdel = i
+           delkm(i) = delkm(i) / ndelkm(i)
+           delkms1 = 0.1d0 * delkm(i) 
+           delkms2 = dsqrt(delkms(i)/ndelkm(i))
+           delkms(i) = dmax1(delkms1,delkms2)
+           if (delkms(i).gt.100.d0) delkms(i) = 100.d0
+           if (delkms(i).lt.10.d0) delkms(i) = 10.d0
+        endif
+705   continue
+
+      if(istdel.gt.0) dtkm = delkm(istdel)
+
+      if (nstc .gt. 2 .and. .not.lloc(1)) then
+
+         call get_circ(stala,stalo,nstat,delkm,delkms,ndelkm,
+     +                elac,elacs,eloc,elocs,nepi,typctl)
+
+         if (nepi.gt.2) then
+            lloc(2) = .true.
+            stlat(2) = elac
+            stlon(2) = eloc
+            stlats(2) = elacs
+            stlons(2) = elocs
+
+            if(typctl.gt.3) then
+               print *
+               print *, 'Epicenter estimated from ',
+     +         nepi,' epicentral-distance observations: '
+               print *,' lat ',elac,' +/- ',elacs,' [deg]'
+               print *,' lon ',eloc,' +/- ',elocs,' [deg]'
+            endif
+         endif
+      endif
+
+71    if(.not.lloc(1) .and. .not.lloc(2)) then
+
+        istatd = 0
+
+        if(single .or. .not.lrasol) go to 711
+
+        if((nstc.eq.1 .or. nstc.eq.2) .and. istdel.gt.0) then
+
+           dtkm = delkm(istdel)
+           azim  = aziom(istdel)
+
+           inddel = 2
+           call delazd(stala(istdel),stalo(istdel),azim,dtkm,
+     +                 inddel,elatmd,elonmd)
+
+           lloc(6) = .true.
+           lloc(7) = .true.
+           lloc(3) = .true.
+           stlat(3) = elatmd
+           stlon(3) = elonmd
+           stlats(3) = sdlati0
+           stlons(3) = sdloni0
+
+           istatd = istdel
+
+           if(typctl.gt.3) then
+              print *
+              print *, 'Epicenter estimated from station ',
+     +        sta(istatd),' with azimuth',azim,' and delta',dtkm,' km'
+              print *,' lat ',elatmd,' +/- ',sdlati0,' [deg]'
+              print *,' lon ',elonmd,' +/- ',sdloni0,' [deg]'
+           endif
+
+           go to 72
+
+        endif
+
+        if(iazim.gt.0) then
+ 
+           azim  = aziom(iazim)
+
+           lloc(6) = .true.
+
+           if(iazim.eq.istatmin) lloc(10) = .true.
+
+        else
+
+           if(plflag .and. nstat.ge.3) then
+
+              call plane(stala,stalo,iev,tt,nobs,azim,dazir,
+     +                   ray,dray,phipl,touse,phase,jref,typctl)
+
+              if(jref.gt.0 .and. dazir.lt.50.d0 .and. dray.lt.4.d0) then
+
+                 lloc(8) = .true.
+                 iazim   = iev(jref)
+
+                 if(typctl.gt.0) then
+                    print *,' '
+                    print *,'Backazimuth defined by plane-wave fit: ',
+     +                      azim,' degrees'
+                 endif
+
+                 if(ray.gt.0.1d0 .and. ray.lt.20.d0 .and.
+     +             dtkm.le.0.d0)  then
+
+                   phidr0 = ' '
+                   phase_t = ' '
+                   call tauget_ray(phidr0,phase_t,ray,modnam(1),zo,ddel,
+     +                     ttray,rayokf)
+
+                   if(rayokf) then
+                       istdel = iazim
+                       if(ray.lt.4.d0) ddel = 120.d0
+                       if(typctl.gt.0) 
+     +                    print *,'Distance defined by ray parameter ',
+     +                         'from plane-wave fit: ', ddel,' degrees'
+                   endif
+                 
+                 endif
+                   
+              endif
+
+           endif
+c
+        endif
+
+        if(istdel.gt.0 .and. iazim.gt.0) then
+
+           dist = 0.d0
+           if(dtkm.gt.0.d0) then
+
+              inddel = 2
+              dist = dtkm
+
+           else if(ddel.gt.0.d0) then
+
+              inddel = 1
+              dist = ddel
+
+           endif
+
+           call delazd(stala(istdel),stalo(istdel),azim,dist,
+     +                 inddel,elatmd,elonmd)
+
+           if (lloc(8)) then
+
+              sdlat0 = dazir*ddel*grad1
+              if(dabs(elatmd).lt.90.d0) then
+                 sdlon0 = dazir*ddel*grad1 /
+     +                    dcos(dabs(elatmd)*deg2rad)
+                 if(sdlon0.lt.sdloni0) sdlon0 = sdloni0
+              else
+                 sdlon0 = 180.d0
+              endif
+
+           else
+
+              sdlat0 = dtkm*grad1
+              if(dabs(elatmd).lt.90.d0) then
+                 sdlon0  = dtkm*grad1 / dcos(dabs(elatmd)*deg2rad)
+                 if(sdlon0.lt.sdloni0) sdlon0 = sdloni0
+              else
+                sdlon0 = 180.d0
+              endif
+
+           endif
+
+           if(sdlat0.lt.sdlati0) sdlat0 = sdlati0
+
+           istatd = istdel
+
+           lloc(7) = .true.
+           lloc(6) = .true.
+           lloc(3) = .true.
+           stlat(3) = elatmd
+           stlon(3) = elonmd
+           stlats(3) = sdlat0
+           stlons(3) = sdlon0
+
+           go to 72
+
+        endif
+
+711     if(rpar .gt. 0.d0) then
 
            phase_t = ' '
-           phidr0 = phase(1)
-           if(phidr0.eq.'P1') phidr0 = 'P'
-           if(phidr0.eq.'S1') phidr0 = 'S'
+           phidr0 = ' '
 
            call tauget_ray(phidr0,phase_t,rpar,modnam(1),zo,ddel,ttray,
      +                     rayokf)
@@ -3338,526 +3938,256 @@ c
                 ddel = 1.d0
                 phidr0 = 'Pg'
              endif
-           
+
            endif
-         
+
+           if(ddel.lt.0.d0) go to 72
+
            if(typctl.gt.0 .and. .not.rayokf) then
-                print *,'No distance found. Missing slowness values?'
-                print *,'Distance set to ',ddel
+              print *,'No distance found. Wrong slowness values?'
+              print *,'Distance set to ',ddel,' from station',
+     +                 sta(istatp)
            else if(typctl.gt.4) then
-              print *,'Initial distance from Station(net): ',ddel
+              print *,'Initial distance',ddel,' from Station: ',
+     +                 sta(istatp)
            endif
 
-        endif
-  
-        if(iazim.le.0 .or. istater.gt.0) then
+           azim  = aziom(istatp)
 
-c
-c       Choose a point in the vicinity (1 deg) of the closest
-c       station as initial solution:
-c
+           inddel = 1
+           call delazd(stala(istatp),stalo(istatp),azim,ddel,
+     +                inddel,elatm,elonm)
 
-           istatd = istatmin
-           azim = 315.d0
+           istatd = istatp
 
-           if(typctl.gt.0 .and. .not.rayokf) then
-                print *,' '
-                print *,'No initial epicenter found. Missing ',
-     +                  'backazimuth values?'
-                print *,'Backazimuth set to ',azim,' degrees'
-           endif
+           lloc(3) = .true.
+           stlat(3) = elatm
+           stlon(3) = elonm
+           stlats(3) = sdlati0
+           stlons(3) = sdloni0
 
-        else
-
-           istatd = istataz
-           azimr  = datan2(azims,azimc)
-           azim   = alpha2(rad2deg*azimr)
+           go to 72
 
         endif
-
-        if(ddel.le.0.d0) ddel = 0.5d0
-
-        inddel = 1
-        call delazd(stala(istatd),stalo(istatd),azim,ddel,
-     +               inddel,elatmgd,elonmd)
-        elatmd = convlat(elatmgd,1)
-
-        if(lauto) l_noepi = .true.
-        if(ddel.lt.30.d0 .and. lautor) l_noepi = .true.
-        if(ddel.gt.18.d0 .and. lautot) l_noepi = .true.
-
-        go to 65
-
-      endif
-
-c
-c     Now mean source coordinates have to be calculated.
-c
-
-      elatmd = sela / svla
-      elatmgd = convlat(elatmd,2)
-
-      elonmd = rad2deg*datan2(selo2/svlo,selo1/svlo)
-
-      if(nloc.eq.1) then
-
-        sdlat0  = elas(1)
-        sdlon0  = elos(1)
-
-      else if(nloc.gt.1) then
-
-        dla = 0.d0
-        dlo = 0.d0
-        do 60 i =1,nloc
-        dla = dla + q2(ela(i)-elatmd) / elas(i)
-        p1 = alpha1(elo(i)-elonmd)
-        dlo = dlo + (p1*p1) / elos(i)
-60      continue
-
-        if(dabs(dla).le.epsilon) then
-          sdlat0  = elas(1)
-        else
-          sdlat0  = dsqrt(dla / svla)
-        endif
-        if(dabs(dlo).le.epsilon) then
-          sdlon0  = elos(1)
-        else
-          sdlon0  = dsqrt(dlo / svlo)
-        endif
-
-      endif
-
-65    continue
-
-c     The next step is to calculate a first source time. If already 
-c     given with input parameter file, this given value will be used.
-c
-c     We are using the method of Wadati. If we have only one travel
-c     time difference S-P we assume Vp/Vs = sqrt(3.). Otherwise
-c     we calculate Vp/Vs as a constants for each specific phase type
-c     (Pg,Pb,Pn,P,P1)-(Sg,Sb,Sn,S,S1).
-c
-c     Which travel-time differences between S and P onsets do we have?
-c     These travel differences are also used to calculate a source 
-c     distance from a station or an array.
-c
-
-      dtkm  = 0.d0
-      idtkm = 0
-
-      do 66 i = 1,idtmax
-      idt(i)=0
-66    continue
-
-      istatd = istatmin
-      if(iazim.gt.0 .and. istater.le.0) istatd = istataz
-
-      if(nobs.eq.1) go to 71
-
-      do 702 i = 1,nobs-1
-
-      if(touse(i)(1:1).ne.'T') go to 702
-
-      do 701 j = i+1,nobs
-
-      if(touse(j)(1:1).ne.'T') go to 701
-
-      kmdel = 0.d0
-
-      if(iev(i).eq.iev(j)) then
-
-         phai = phase(i)
-         phaj = phase(j)
-
-         dtwad = dabs(tt(j)-tt(i))
-
-         if(stcorfl) then
-            st1=0.d0
-            st2=0.d0
-            if(phase_type(phase(i)).eq.'P') st1 = statp(iev(i))
-            if(phase_type(phase(i)).eq.'S') st1 = stats(iev(j))
-            if(phase_type(phase(j)).eq.'P') st2 = statp(iev(j))
-            if(phase_type(phase(j)).eq.'S') st2 = stats(iev(j))
-            dtwad = dtwad + st1 - st2
-         endif
-
-        wadati = .true.
-        if(dtwad.gt.wadmax) wadati = .false.
-        if(dtwad.lt.wadmin) wadati = .false.
-
-        if((phai.eq.'P       ' .and. phaj.eq.'S       ') .or.
-     +     (phai.eq.'S       ' .and. phaj.eq.'P       ')) then
-
-          if(wadati) then
-             idt(1)        = idt(1) + 1
-             dt(1,idt(1))  = dtwad
-
-             if(phai(1:1).eq.'P') then
-                idtp(1,idt(1))= i
-                idts(1,idt(1))= j
-             else
-                idtp(1,idt(1))= j
-                idts(1,idt(1))= i
-             endif
-          endif
-
-          if(iev(i).eq.istatd) then
-            kmdel = (dtwad/60.d0-1.d0)*1000.d0
-            if(kmdel.le.2000.d0) kmdel = dtwad*10.2d0
-          endif
-
-        else if(( phai.eq.'P1      ' .and. (phaj.eq.'S1      ' .or.
-     +            phaj.eq.'Sg      '  .or. phaj.eq.'Sb      '  .or.
-     +            phaj.eq.'Sn      '  .or. phaj.eq.'S       ' )) .or.
-     +          ( phai.eq.'S1      ' .and. (phaj.eq.'P1      ' .or.
-     +            phaj.eq.'Pg      '  .or. phaj.eq.'Pb      '  .or.
-     +            phaj.eq.'Pn      '  .or. phaj.eq.'P       ' )) .or.
-     +          ((phai.eq.'Pg      '  .or. phai.eq.'Pb      '  .or. 
-     +            phai.eq.'Pn      '  .or. phai.eq.'P       ') .and. 
-     +            phaj.eq.'S1      ' ) .or.
-     +          ((phai.eq.'Sg      '  .or. phai.eq.'Sb      '  .or. 
-     +            phai.eq.'Sn      '  .or. phai.eq.'S       ') .and. 
-     +            phaj.eq.'P1      ' ) ) then
-c
-c         For P1 and S1 it is not automatically known, which phase it will
-c         become. We use AK135 to choose the most
-c         presumable phase type for the Wadati Approach.
-c
-          if(wadati) then
-             idtc = 1
-             if(dtwad.lt.200.0d0) idtc = 3
-             if(dtwad.lt.17.6d0)  idtc = 2
-
-             idt(idtc)          = idt(idtc) + 1
-             dt(idtc,idt(idtc)) = dtwad
-
-             if(phai(1:1).eq.'P') then
-                idtp(idtc,idt(idtc))= i
-                idts(idtc,idt(idtc))= j
-             else
-                idtp(idtc,idt(idtc))= j
-                idts(idtc,idt(idtc))= i
-             endif
-          endif
-
-          if(iev(i).eq.istatd) then
-             if(idtc.eq.1) then
-               kmdel = (dtwad/60.d0-1.d0)*1000.d0
-               if(kmdel.le.2000.d0) kmdel = dtwad*10.2d0
-             else if(idtc.eq.2) then
-               kmdel = dtwad*8.58d0
-             else if(idtc.eq.3) then
-               kmdel = dtwad*10.2d0
-             endif
-          endif
-
-        else if((phai.eq.'Pg      '                      .and.
-     +          (phaj.eq.'Sg      '.or.phaj.eq.'Lg      ')) .or.
-     +          (phaj.eq.'Pg      '                      .and.
-     +          (phai.eq.'Sg      '.or.phai.eq.'Lg      ')))then
-
-          if(wadati) then
-             idt(2)        = idt(2) + 1
-             dt(2,idt(2))  = dtwad
-
-             if(phai(1:1).eq.'P') then
-                idtp(2,idt(2))= i
-                idts(2,idt(2))= j
-             else
-                idtp(2,idt(2))= j
-                idts(2,idt(2))= i
-             endif
-          endif
-
-          if(iev(i).eq.istatd) kmdel = dtwad*8.58d0
-
-        else if((phai.eq.'Pn      '.and.phaj.eq.'Sn      ') .or.
-     +          (phaj.eq.'Pn      '.and.phai.eq.'Sn      '))then
-
-          if(wadati) then
-             idt(3)        = idt(3) + 1
-             dt(3,idt(3))  = dtwad
-
-             if(phai(1:1).eq.'P') then
-                idtp(3,idt(3))= i
-                idts(3,idt(3))= j
-             else
-                idtp(3,idt(3))= j
-                idts(3,idt(3))= i
-             endif
-          endif
-
-          if(iev(i).eq.istatd) kmdel = dtwad*10.2d0
-
-        else if((phai.eq.'Pb      '.and.phaj.eq.'Sb      ') .or.
-     +          (phaj.eq.'Pb      '.and.phai.eq.'Sb      '))then
-
-          if(wadati) then
-             idt(4)        = idt(4) + 1
-             dt(4,idt(4))  = dtwad
-
-             if(phai(1:1).eq.'P') then
-                idtp(4,idt(4))= i
-                idts(4,idt(4))= j
-             else
-                idtp(4,idt(4))= j
-                idts(4,idt(4))= i
-             endif
-          endif
-
-          if(iev(i).eq.istatd) kmdel = dtwad*9.47d0
-
-        else if(phai.eq.'Pn      '                          .and.
-     +      (phaj.eq.'Sg      '.or. phaj.eq.'Lg      ')) then
-
-          if(iev(i).eq.istatd) kmdel = dtwad*6.02d0
-
-        else if(phaj.eq.'Pn      '                          .and.
-     +      (phai.eq.'Sg      '.or. phai.eq.'Lg      ')) then
-
-          if(iev(i).eq.istatd) kmdel = dtwad*6.02d0
-
-        endif
-
-        if(kmdel.gt.0.d0) then
-           idtkm = idtkm + 1
-           dtkm  = dtkm + kmdel
-        endif
-
-      endif
-
-701   continue
-702   continue
-
-71    inet = 0
-
-      if(idtkm.gt.0 .and. nloc.eq.0) then
-
-         dtkm = dtkm / dble(idtkm)
-
-         if(iazim.gt.0 .and. istater.le.0) then
-
-            inddel = 2
-            call delazd(stala(istataz),stalo(istataz),azim,dtkm,
-     +               inddel,elatmgd,elonmd)
-            elatmd = convlat(elatmgd,1)
-
-            if(typctl.gt.0) then
-               if(dtkm.le.0d0) then
-                 print *,'Epicenter set to station ', sta(istataz)
-               else
-                 print *,'Epicenter set from station ',
-     +               sta(istataz),': backazimuth',azim,' deg, delta',
-     +               dtkm,' km' 
-               endif
-            endif
-
-            sdlatg0 = dtkm*grad1
-            sdlon0  = dtkm*grad1
-
-            if(lauto) l_noepi = .true.
-            if(ddel.lt.2500.d0 .and. lautor) l_noepi = .true.
-
-
-         else 
-
-            if(plflag) then
-
-               call plane(stala,stalo,iev,tt,nobs,azim,dazir,
-     +                    ray,dray,phipl,touse,phase,jref,typctl)
-
-               if(jref.gt.0 .and. dazir.lt.50.d0 .and.
-     +            dray.lt.4.d0) then
-
-                   inddel = 2
-                   call delazd(stala(iev(jref)),stalo(iev(jref)),azim,
-     +                         dtkm,inddel,elatmgd,elonmd)
-                   elatmd = convlat(elatmgd,1)
-
-                   if(typctl.gt.0) then
-                      if(dtkm.le.0d0) then
-                        print *,'Epicenter set to station ',sta(jref)
-                      else
-                        print *,'Epicenter set from station ',
-     +                            sta(jref),' after plane wave fit: ',
-     +                      'backazimuth',azim,' deg, delta',dtkm,' km' 
-                      endif
-                   endif
-
-                   sdlatg0 = dazir*dtkm*grad1
-                   sdlon0  = dazir*dtkm*grad1
- 
-                   if(lauto) l_noepi = .true.
-                   if(ddel.lt.2500.d0 .and. lautor) l_noepi = .true.
-
-                   go to 72
-
-               endif
-
-            endif
-
-            elatmd = stalam
-            elonmd = stalom
-
-            inet = 1
-
-            if(lauto) l_noepi = .true.
-
-            if(typctl.gt.0) 
-     +         print *, 'Epicenter set in center of station net '
-
-         endif
             
-      else if(nloc.eq.0 .and. nstat.gt.1) then
-            
-         elatmd = stalam
-         elonmd = stalom
-         inet = 1
-
-         if(lauto) l_noepi = .true.
-
-         if(typctl.gt.0) 
-     +      print *, 'Epicenter set in center of station net '
-
       endif
 
 72    continue
 
-      if(l_noepi .and. epistart) epistart = .false.
+c
+c     output for lloc(1)
+c
+      if(lloc(1)) then
 
-      if(epistart) then
-        elatm  = elatmf
-        elonm  = elonmf
-        elatmg = elatmgf
-      else
-        elatm  = elatmd
-        elonm  = elonmd
-        elatmg = elatmgd
+         elatm  = stlat(1)
+         elonm  = stlon(1)
+         sdlat0 = stlats(1)
+         sdlon0 = stlons(1)
+
+         if(output) 
+     +     write(11,'(''Initial epicenter calculated from'',i6,
+     +              '' backazimuth-observation pairs''/)') nloc
+
+         if(json_out) then
+            call json_start_dict_group("Location_with_BAZ observations",
+     +           json_rc)
+
+            call json_add_int("BAZ_observations", nloc,json_rc)
+
+            call json_add_double("BAZ_latitude", elatm, json_rc)
+            call json_add_double("BAZ_latitude_uncertainty", sdlat0,
+     +           json_rc)
+            call json_add_double("BAZ_longitude", elonm, json_rc)
+            call json_add_double("BAZ_longitude_uncertainty", sdlon0,
+     +           json_rc)
+            call json_end_group(json_rc)
+         endif
+
+         if(azionlyf) go to 9999
+
+         goto 73
+
       endif
 
-      elatmr  = deg2rad*elatm
-      elatmgr = deg2rad*elatmg
-      coelatm = 90.d0 - elatm
-      coelatmr= deg2rad*coelatm
+c
+c     output for lloc(2)
+c
+      if(lloc(2)) then
 
-      fsetloc = .true.
+         elatm  = stlat(2)
+         elonm  = stlon(2)
+         sdlat0 = stlats(2)
+         sdlon0 = stlons(2)
 
-      if(sdlat0.gt.0.d0) then
-         sdlatg0 = sdlat0  / (eps*q2(dcos(elatmr))+q2(dsin(elatmr)))
-      else
-         sdlat0  = sdlatg0 * eps / (q2(dcos(elatmgr)) + 
-     +                              eps*q2(dsin(elatmgr)))
+         if(output) 
+     +      write(11,'(''Initial epicenter estimated with'',i4,
+     +               '' epicentral distance observations:''/)') nepi
+
+         if(json_out) then
+            call json_start_dict_group(
+     +           "Location_with_DELTA observations",json_rc)
+
+            call json_add_int("DELTA_observations", nepi,json_rc)
+
+            call json_add_double("DELTA_latitude", elatm, json_rc)
+            call json_add_double("DELTA_latitude_uncertainty", sdlat0,
+     +           json_rc)
+            call json_add_double("DELTA_longitude", elonm, json_rc)
+            call json_add_double("DELTA_longitude_uncertainty", sdlon0,
+     +           json_rc)
+            call json_end_group(json_rc)
+         endif
+
+         goto 73
+
       endif
 
-      if(dismin.lt.pi .and. nloc.gt.0) then
-         dismin = dismin * rad2deg * 5.d-2
-         if(sdlatg0 .lt. dismin) then
-            sdlatg0  = dismin
-            sdlat0  = sdlatg0 * eps / (q2(dcos(elatmgr)) + 
-     +                                 eps*q2(dsin(elatmgr)))
-         endif 
-         if(sdlon0 .lt. dismin) sdlon0  = dismin
-      endif
+c
+c     output for lloc(3)
+c
+      if(lloc(3)) then
 
-      if(typctl.gt.0) then
-        print *,' '
-        if(nloc.gt.0) then
-           print*,'Mean epicenter calculated from ',nloc,
-     +                  ' observation(s)'
-        else
-           print*,'Initial epicenter:'
+         elatm  = stlat(3)
+         elonm  = stlon(3)
+         sdlat0 = stlats(3)
+         sdlon0 = stlons(3)
+
+         if(output) then
+
+            if(lloc(10)) then
+              write(11,'(''Initial epicenter set from closest '',
+     +                   ''station '',a,$)') sta(istatd)
+           else 
+              write(11,'(''Initial epicenter set from station '',a,$)') 
+     +           sta(istatd)
+           endif
+
+           if(lloc(6)) then
+              if(lloc(8)) then
+                 write (11,'('' with a plane-wave-fit estimated BAZ '',
+     +                       ''of'',f6.1,'' [deg]'',$)') azim
+              else
+                 write (11,'('' with an estimated BAZ of'',f6.1,
+     +                       '' [deg]'',$)') azim
+              endif
+           else
+              write (11,'('' with (mean) observed BAZ of'',f6.1,
+     +                    '' [deg]'',$)') azim
+           endif
+
+           if(ddel.ge.0d0) then
+              write(11,'('' and a distance of'',f6.1,
+     +                   '' [deg]''/)') ddel
+           else
+              write(11,'('' at a distance of '',f6.1,
+     +                   '' [km]''/)') dtkm 
+           endif
+
+         endif
+
+         goto 73
+
+      endif
+c
+      if(epistart0) then
+
+         if(epistart.neqv.epistart0) epistart = epistart0
+c
+c     output for lloc(5)
+c
+        if(lloc(5)) then
+           if(output)
+     +     write(11,'(''Initial Epicenter set by input ISF file'')')
+           elatm  = stlat(5)
+           elonm  = stlon(5)
+           sdlat0 = stlats(5)
+           sdlon0 = stlons(5)
+
+           goto 73
+
         endif
-        print*,'(Mean) epicenter lat: ',elatmgd,' +/- ',sdlatg0
-        print*,'(Mean) epicenter lon: ',elonmd,' +/- ',sdlon0
+
+c
+c     output for lloc(4)
+c
+        if(lloc(4)) then
+           if(output)
+     +     write(11,'(''Initial Epicenter set by parameter file'')')
+           elatm  = stlat(4)
+           elonm  = stlon(4)
+           sdlat0 = stlats(4)
+           sdlon0 = stlons(4)
+
+           goto 73
+
+        endif
+
       endif
+
+c
+c     output for lloc(9)
+c
+      if(lloc(9)) then
+
+         elatm  = stlat(9)
+         elonm  = stlon(9)
+         sdlat0 = stlats(9)
+         sdlon0 = stlons(9)
+
+         if(output) then
+            write(11,'(''Initial epicenter set in the center of '',
+     +            ''station net ''/)')
+         endif
+
+         goto 73
+
+      endif
+
+      if (istatmin.gt.0) then
+         elatm = stala(istatmin)
+         elonm = stalo(istatmin)
+         sdlat0 = sdlati0
+         sdlon0 = sdloni0
+         if(output) 
+     +      write(11,'(''Initial epicenter set to the closest '',
+     +                 ''station '',a5/)') sta(istatmin)
+      else
+         print *,' Too little information for an initial epicenter!!'
+         if(output) write(11,
+     +      '(''Too little info for an initial epicenter!'')')
+         go to 9999
+      endif
+
+73    continue
 
       if(output) then
-
-        if(nloc.gt.0) then
-
-           write(11,'(/''Parameters of initial solution ('',
-     +              ''+/- 1 standard deviation):''/)') 
-           write(11,'(''Mean epicenter calculated from'',i6,
-     +              '' backazimuth observation pairs'')') nloc
-           write(11,'(''Mean epicenter lat:'',f9.3,'' +/- '',f9.3,
-     +              '' [deg]'')')        elatmgd,sdlatg0
-           write(11,'(''Mean epicenter lon:'',f9.3,'' +/- '',f9.3,
-     +              '' [deg]''/)')        elonmd,sdlon0
-
-        else if(.not.(epistart .and.  .not.
-     +         (nstat.eq.1.and.(dtkm.gt.0.d0 .or. ddel.gt.0.d0))))  then
-
-           write(11,'(''No initial solution from multiple backazimuth ''
-     +            ,''observations possible.''/)')
-
-           if(inet.ne.0) then
-
-               write(11,'(''Epicenter set in the center of station'',
-     +                   '' net '')')
-
-           else if(iazim.gt.0 .and. istater.le.0) then
-
-               if(idtkm.gt.0 .and. dtkm.gt.0.d0) then
-                  write(11,'(''Epicenter set from station '',
-     +               a,'' with backazimuth'',f6.1,'' [deg], delta'',
-     +               f8.2,'' [km]'')') sta(istatd),azim,dtkm
-               else if(ddel.gt.0.d0) then
-                  write(11,'(''Epicenter set from station '',
-     +               a,'' with backazimuth'',f6.1,'' [deg], delta'',
-     +               f7.2,'' [deg]'')') sta(istatd),azim,ddel
-               else
-                  write(11,'(''Epicenter set to station '',a)') 
-     +               sta(istatd)
-               endif
-           endif
-  
-           write(11,'(''Epicenter lat:'',f9.3,'' [deg]'')')  elatmgd
-           write(11,'(''Epicenter lon:'',f9.3,'' [deg]''/)') elonmd
-
-        endif
-
+         write(11,'(''Parameters of initial solution ('',
+     +            ''+/- 1 standard deviation):'')')
+         write(11,'(''Epicenter lat:'',f9.3,'' +/-'',f9.3,'' [deg]''
+     +             )')  elatm,sdlat0
+         write(11,'(''Epicenter lon:'',f9.3,'' +/-'',f9.3,'' [deg]''
+     +             /)') elonm,sdlon0
       endif
 
-      if(json_out .and. nloc.gt.0) then
-         call json_start_dict_group("Location_with_BAZ observations",
-     +        json_rc)
 
-         call json_add_int("BAZ_observations", nloc,json_rc)
+      elatmr = deg2rad*elatm
 
-         call json_add_double("BAZ_latitude", elatmgd, json_rc)
-         call json_add_double("BAZ_latitude_uncertainty", sdlatg0, 
-     +        json_rc)
-         call json_add_double("BAZ_longitude", elonmd, json_rc)
-         call json_add_double("BAZ_longitude_uncertainty", sdlon0,
-     +        json_rc)
-         call json_end_group(json_rc)
-      endif
+      elatmg   = convlat(elatm,1)
+      elatmgr  = deg2rad*elatmg
 
-      if(azionlyf) go to 9999
+      coelatmg = 90.d0 - elatmg
+      coelatmgr= deg2rad*coelatmg
 
-      if(epistart) then
+c
 
-        sdlatg0 = sdlatgi0
-        sdlon0  = sdloni0
-
-        write(11,'(''Initial Epicenter set by input file'')')
-        write(11,'(''Epicenter lat:'',f9.3,'' [deg]'')')  elatmgf
-        write(11,'(''Epicenter lon:'',f9.3,'' [deg]''/)') elonmf
-
-        if(typctl.gt.0) then
-          print *,' '
-          print *, 'Initial Epicenter set by input file'
-          print *, 'Epicenter lat: ',elatmgf,' [deg]'
-          print *, 'Epicenter lon: ',elonmf,' [deg]'
-          print *,' '
-        endif
-      endif
+      sdlat0g  = sdlat0 * eps / (q2(dcos(elatmr)) + 
+     +                           eps*q2(dsin(elatmr)))
 
       if(typctl.gt.8) then
 
         do 75 i=1,nstat
 
-        call depi(stala(i),stalo(i),elatmg,elonm,del(i),dk,azie(i),
+        call depi(stala(i),stalo(i),elatm,elonm,del(i),dk,azie(i),
      +                  baz(i),d2km)
 
         if(azi(i).ge.0.d0) then
@@ -3870,6 +4200,20 @@ c
 
       endif
 
+      if(epistart) go to 821
+c
+c     The next step is to calculate a first source time 
+c     +/- its uncertainty
+c
+c     If already a source time is given with input parameter file, 
+c     this given value will be used.
+c
+c     We are using the method of Wadati. If we have only one travel
+c     time difference S-P we assume Vp/Vs = sqrt(3.). Otherwise
+c     we calculate Vp/Vs as a constant for each specific phase type
+c     [(Sg,Sb,Sn,S) - (Pg,Pb,Pn,P)].
+c
+
       do 80 i=1,idtmax
 
       vpvs(i) = 0.d0
@@ -3879,11 +4223,14 @@ c
       if(idt(i).eq.1) then
 
         vpvs(i) = dsqrt(3.d0)
+        vpvss(i)= 0.2d0
+
         f1      = 1.d0/(vpvs(i)-1.d0)
 
         to(i)   = tt(idtp(i,1)) - dt(i,1)*f1
-        tos(i)  = dpythag((1.d0+f1)*tts(idtp(i,1)),f1*tts(idts(i,1)))
-        vpvss(i)= 0.5d0
+        tos(i)  = dsqrt(q2((1.d0+f1) *tts(idtp(i,1))) +
+     +                  q2(     -f1  *tts(idts(i,1))) +
+     +                  q2(dt(i,1)*f1*f1*vpvss(i)   ) )
 
       else if(idt(i).eq.2) then
 
@@ -3904,17 +4251,17 @@ c
         f4 = am1*am1
         vpvss(i)= dsqrt ( q2(( f2+f3)*tts(idtp(i,1))) +
      +                    q2((-f2-f3)*tts(idtp(i,2))) +
-     +                    q2(  f2    *tts(idts(i,1))) +
-     +                    q2( -f2    *tts(idts(i,2))) )
+     +                    q2( -f2    *tts(idts(i,1))) +
+     +                    q2(  f2    *tts(idts(i,2))) )
         
-        tos(i) = dsqrt( q2( (1.d0+am1+dt(i,1)*(f2+f3)*f4 )
+        tos(i) = dsqrt( q2( (1.d0+am1+dt(i,1)*( f2+f3)*f4 )
      +                                         *tts(idtp(i,1)) )   +
      +                  q2( (         dt(i,1)*(-f2-f3)*f4 )
-     +                                   *tts(idtp(i,2)) )   +
-     +                  q2( (    -am1+dt(i,1)*f2     *f4 )
-     +                                   *tts(idtp(i,2)) )   +
-     +                  q2( (        -dt(i,1)*f2     *f4 )
-     +                                 *tts(idtp(i,2)) )   )
+     +                                         *tts(idtp(i,2)) )   +
+     +                  q2( (    -am1-dt(i,1)*  f2    *f4 )
+     +                                         *tts(idts(i,1)) )   +
+     +                  q2( (         dt(i,1)*  f2    *f4 )
+     +                                         *tts(idts(i,2)) )    )
 
       else 
 
@@ -3944,7 +4291,7 @@ c       endif
         call dlsq(in,im)
 
         if(lsqerr.gt.0) then
-          if(typctl.gt.4) print*,'Wadati TYPE ',i,' LSQ-uncertainty: ',
+          if(typctl.gt.4) print*,'Wadati TYPE ',i,' LSQ-error: ',
      +       lsqerr
           idt(i) = 0
           go to 80
@@ -4012,7 +4359,6 @@ c        endif
      +      f6.1,'' [s] Vp/Vs= '',f4.2,'' +/- '',f4.2)') i,idt(i),
      +      to(i)+timemin,tos(i),vpvs(i),vpvss(i)
          endif
-
       endif
 
       if(json_out) then
@@ -4035,12 +4381,11 @@ c        endif
         call json_end_group(json_rc)
       endif
 
-      fsetloc = .false.
-
 80    continue
 
 c
-c     now follows the statistics over all estimated to-values
+c     now follows the statistics over all estimated to-values and Vp/Vs
+c     rations
 c
       sto     = 0.d0
       stos    = 0.d0
@@ -4074,29 +4419,18 @@ c
  
 82    continue
  
-      if(ito.eq.0) then
+821   if(ito.eq.0) then
 
-         if(fsetloc .or. nloc.ge.1) then
+         call depi(stala(istatmin),stalo(istatmin),elatm,elonm,
+     +             del(istatmin),dk,azie(istatmin),baz(istatmin),d2km)
+         rzo1 = 0.
+         rdel = real(del(istatmin))
 
-           call depi(stala(istatmin),stalo(istatmin),elatmg,elonm,
-     +               del(istatmin),dk,azie(istatmin),baz(istatmin),d2km)
-           rzo1 = 0.
-           rdel = real(del(istatmin))
+         call tauget_mod(rzo1,rdel,nphas,phcd1,ttc1,dtdd1,
+     +                       dtdh1,dddp1,modnam(1))
 
-           call tauget_mod(rzo1,rdel,nphas,phcd1,ttc1,dtdd1,
-     +                         dtdh1,dddp1,modnam(1))
+         tom  = - ttc1(1)
 
-           tom  = - ttc1(1)
-
-         else
-
-           if(ttray.gt.0d0) then
-              tom  = -ttray
-           else
-              tom  = -dtp0/2.d0
-           endif
-
-         endif
          vpvsm = 0.d0
          sdto = dtp0
          go to 85
@@ -4155,20 +4489,15 @@ c
             endif
 
          endif
-      endif
 
-      if(json_out) then
-        if(ito.gt.0) then
-          call json_add_double("mean_source_time", tome, json_rc)
-          call json_add_double("mean_source_time_uncertainty", sdto, 
-     +         json_rc)
-          call json_add_double("mean_vp_vs", vpvsm, json_rc)
-          call json_add_double("mean_vp_vs_uncertainty", sdvpvs, 
-     +         json_rc)
-        else
-          call json_add_double("initial_source_time", tome, json_rc)
-        endif
-
+         if(json_out) then
+            call json_add_double("mean_source_time", tome, json_rc)
+            call json_add_double("mean_source_time_uncertainty", sdto, 
+     +           json_rc)
+            call json_add_double("mean_vp_vs", vpvsm, json_rc)
+            call json_add_double("mean_vp_vs_uncertainty", sdvpvs, 
+     +           json_rc)
+         endif
       endif
 
 c
@@ -4209,18 +4538,18 @@ c     several iterations using the GMI algorithm.
 c
 c     For the first iteration we use as initial solution the read in 
 c     source depth (or the ISC default depth), the source time to, and 
-c     the epicenter coordinates elatmg and elonm.
+c     the epicenter coordinates elatm and elonm.
 c
 
       if(ldefisc) then
-         call def_depth(defdep,elatmg,elonm,idetyp,ldefd,c1typ,ideptyp)
+         call def_depth(defdep,elatm,elonm,idetyp,ldefd,c1typ,ideptyp)
          zo = defdep
       endif
 
       if(lwdepth ) then
-          water = wdepth(elatmg,elonm)
+          water = wdepth(elatm,elonm)
           if(water.gt.zo) then
-             zo = dble(dnint(water+0.5d0))
+             zo = dble(idnint(water+0.5d0))
              if(typctl.gt.4) then
                 print *, 'water depth at source:', water,' km'
                 print *, 'depth fixed at: ',zo,' km'
@@ -4230,10 +4559,10 @@ c
           endif
       endif
 
-      sdzo   = sdzo1
-      sdlat  = sdlat0
+      sdzo   = sdzo0
+      sdlatg  = sdlat0g
       sdlon  = sdlon0
-      sdlatg = sdlatg0
+      sdlat = sdlat0
 
       if(json_out) then
 
@@ -4241,9 +4570,9 @@ c
          call json_add_double("initial_source_time", tome, json_rc)
          call json_add_double("initial_source_time_uncertainty",
      +       sdto, json_rc)
-         call json_add_double("initial_latitude", elatmg, json_rc)
+         call json_add_double("initial_latitude", elatm, json_rc)
          call json_add_double("initial_latitude_uncertainty", 
-     +       sdlatg, json_rc)
+     +       sdlat, json_rc)
          call json_add_double("initial_longitude", elonm, json_rc)
          call json_add_double("initial_longitude_uncertainty", 
      +       sdlon, json_rc)
@@ -4259,13 +4588,15 @@ c     Add list of origins to output before loop begins
 
 99    continue
 
+      if(nobs.gt.1) single = .false.
+
       rs(1) = sdto
-      rs(2) = sdlat
+      rs(2) = sdlatg
       rs(3) = sdlon
       rs(4) = sdzo
 
       var(1) = sdto
-      var(2) = sdlat
+      var(2) = sdlatg
       var(3) = sdlon
       var(4) = sdzo
 
@@ -4295,7 +4626,6 @@ c
 c     At first, we build the Jacobi-matrix
 c     (loop 300 and 301)
 c
-      if(output) print*,' '
 
 100   continue
 
@@ -4326,9 +4656,9 @@ c
       du0 = 0.d0
       du1 = 0.d0
       idum = 2
-      coelatm = 90.d0 - elatm
-      coelatmr= deg2rad*coelatm
-      call elpcor('P',du0,du0,coelatmr,du0,du1,eflag,idum)
+      coelatmg = 90.d0 - elatmg
+      coelatmgr= deg2rad*coelatmg
+      call elpcor('P',du0,du0,coelatmgr,du0,du1,eflag,idum)
 c
 
 c     nextiter.lt.0 if oszillating solutions
@@ -4411,7 +4741,7 @@ c     nextiter.lt.0 if oszillating solutions
 
       if(sta(iev(i)).ne.stato) then
 
-         call depi(stala(iev(i)),stalo(iev(i)),elatmg,elonm,del(iev(i)),
+         call depi(stala(iev(i)),stalo(iev(i)),elatm,elonm,del(iev(i)),
      +              dk,azie(iev(i)),baz(iev(i)),d2km)
 
          delta = del(iev(i))
@@ -4421,8 +4751,8 @@ c     nextiter.lt.0 if oszillating solutions
          endif
 
          if(kmout) then
-            if(dk .gt. dismaxst ) go to 300
-            if(dk .lt. disminst ) go to 300
+            if(dk .gt. dismaxstk ) go to 300
+            if(dk .lt. disminstk ) go to 300
          else
             if(delta .gt. dismaxst ) go to 300
             if(delta .lt. disminst ) go to 300
@@ -4450,8 +4780,7 @@ c     nextiter.lt.0 if oszillating solutions
          rzo = sngl(zo)
          rdel = sngl(delta)
 
-         costalat  = 90.d0-convlat(stala(iev(i)),1)
-         costalatr = deg2rad*costalat
+         costalatr = deg2rad*(90.d0-stalag(iev(i))) 
 
          loctt = 0
 
@@ -4535,7 +4864,7 @@ c              no event deeper than 799. km !
 
             ierr = 0
             indph = istaph(iev(i))*10000 + indph0
-            elatc = elatmg
+            elatc = elatm
             elonc = elonm
 
             elat2 = stala(iev(i))
@@ -4571,8 +4900,8 @@ c              no event deeper than 799. km !
             dpdh(nphas) = 0.d0
          endif
 
-         f1 = dcos(coelatmr)
-         f3 = dsin(coelatmr)
+         f1 = dcos(coelatmgr)
+         f3 = dsin(coelatmgr)
 
          f2 = dcos(costalatr)
          f4 = dsin(costalatr)
@@ -4689,7 +5018,7 @@ c
       if(phid.eq.'Rg') then
          if(.not.rgsurf) then
             dtt=tt(i) - tom - dk/vrg + statr(iev(i))
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          if(dk.le.400.d0) then
@@ -4703,7 +5032,7 @@ c
       if(phid.eq.'Lg' ) then
          if(.not.lgsurf) then
             dtt=tt(i) - tom - dk/vlg + statr(iev(i))
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          if(dk.le.3000.d0) then
@@ -4784,7 +5113,7 @@ c     print *,'---> (0-1) phid,surf ',i,phid,surf
             touse(i)(1:1) = ' '
             touse(i)(3:4) = '  '
             dtt=tt(i) - tom - dk/vlr + statr(iev(i))
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          surf = .true.
@@ -4796,7 +5125,7 @@ c     print *,'---> (0-1) phid,surf ',i,phid,surf
             touse(i)(1:1) = ' '
             touse(i)(3:4) = '  '
             dtt=tt(i) - tom - dk/vlq + statr(iev(i))
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          surf = .true.
@@ -4808,7 +5137,7 @@ c     print *,'---> (0-1) phid,surf ',i,phid,surf
             touse(i)(1:1) = ' '
             touse(i)(3:4) = '  '
             dtt=tt(i) - tom - dk/vt
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          surf = .true.
@@ -4820,7 +5149,7 @@ c     print *,'---> (0-1) phid,surf ',i,phid,surf
             touse(i)(1:1) = ' '
             touse(i)(3:4) = '  '
             dtt=tt(i) - tom - dk/vi
-            phaseu(i) = phase(i)
+            phaseu(i) = phid
             go to 299
          endif
          surf = .true.
@@ -4843,7 +5172,8 @@ c     print *,'---> (0-1) phid,surf ',i,phid,surf
 
       nphass = nphas
 
-c     print *,'---> (2) phid0,phid,phid1 ',i,phid0,phid,phid1,firston
+c     print *,'---> (2) phid0,phid,phid1 ',i,phid0,phid,phid1,firston,
+c    +        nphass
 
       j = 0
       first2 = .false.
@@ -4938,7 +5268,7 @@ c
            if(rzoe.gt.700.d0) rzoe=700.d0
            ierre = 0
 
-           call ellip(coelatmr,azie(iev(i)),delta,rzoe,phid1,dpa,ecor,
+           call ellip(coelatmgr,azie(iev(i)),delta,rzoe,phid1,dpa,ecor,
      +                ierre)
 
          endif
@@ -5002,7 +5332,7 @@ c    +              indr,hsta,elev,stael(iev(i))
 
               if(phin.lt.1.d0) then
 
-                 dl = hsta / dcos(dasin(phin))
+                 dl = hsta / dcos(fcheck(phin,1))
 
                  ddis2 = q2(dl)-q2(hsta)
                  if(ddis2.lt.1.d-3) ddis2 = 0.d0
@@ -5119,7 +5449,7 @@ c
 c     Reflection point lat/lon
 c
             inddel = 1
-            call delazd(elatmg,elonm,azi0,del0,inddel,elatc,elonc)
+            call delazd(elatm,elonm,azi0,del0,inddel,elatc,elonc)
 
 c
 c     Correction for depth phases (e.g.: pP, pwP, sS, pS, sP, ...)
@@ -5239,6 +5569,8 @@ c
      +                + th + tcrust + trefl - statict
 
          dtt    = tt(i) - ttt(i)
+
+c        print *,'time ',i,tt(i) , ttt(i),dtt
  
          if(iwl.gt.0 .and. usedr.eq.'R' .and. phase_t.eq.'P'
      +      .and. dabs(trefl2).ge.epsilon) then
@@ -5522,7 +5854,7 @@ c    +        dtt,dtm,delta,touse(i),dtmaxslow,surf
 c          print *,'ray p',ddpa,p(i),dpaa,dpam,fixinp
 
            if(dabs(ddpa).lt.dpam .or. 
-     +        (fixinp .and. dabs(ddpa).lt.10d0) ) then
+     +        (fixinp .and. dabs(ddpa).lt.10.0d0) ) then
              jj  = jj + 1
              jpa = jpa + 1
              dat(jj)  = ddpa
@@ -5545,7 +5877,7 @@ c          print *,'ray p',ddpa,p(i),dpaa,dpam,fixinp
              endif
 
              used(i)(3:3) = 'S'
-             phaseu(i) = phid
+             if(phaseu(i).eq.' ') phaseu(i) = phid
 
              dinv(i,3) = dble(jj)
 
@@ -5590,6 +5922,7 @@ c
 297   continue
 
 2975  if(single) go to 299
+
       if(used(i)(1:1).ne.' ' .or. used(i)(3:3).ne.' ') go to 299
 
 c
@@ -5643,7 +5976,9 @@ c    +        phid,phid0,phaseu(i),used(i),dtt
            a(jj,2) = dazidla
            a(jj,3) = dazidlo
            a(jj,4) = 0.d0
+
            used(i)(2:2) = 'A'
+           if(phaseu(i).eq.' ') phaseu(i) = phid
 
            dinv(i,2) = dble(jj)
 
@@ -5666,7 +6001,7 @@ c    +        phid,phid0,phaseu(i),used(i),dtt
          dtm0   = dtmp + dtms
          dazim  = dazim * 1.5d0
          dpam   = dpam * 1.5d0
-         datmax0 = datmax0 * 5.d0
+         datmax0 = datmax * 5.d0
          go to 101
       endif
 
@@ -5692,6 +6027,8 @@ c    +        phid,phid0,phaseu(i),used(i),dtt
          iteraz = iteraz + 1
       endif
 
+      ndt = 0
+
       if(.not.diffflag) go to 302
 c
 c     Add possible travel-time difference(s) as additional 
@@ -5700,10 +6037,7 @@ c
 c     Travel-time differences can only be used in the case that we 
 c     have more than 2 different phase observations at one station.
 c
-      
       if(jdt.le.2) go to 302
-
-      ndt = 0
 
       do 3011 i = 1,nobs-1
 
@@ -5712,14 +6046,16 @@ c
 
       do 301 j = i+1,nobs
 
+         if(iev(i).ne.iev(j)) go to 301
+
          if(touse(j)(4:4).ne.'D' ) go to 301
          if(used(j)(1:1).eq.' ') go to 301
 
-         if(iev(i).ne.iev(j)) go to 301
-
          if(phaseu(i).eq.phaseu(j)) go to 301
+
          if(dabs(tt(i)-tt(j)).le.1.d-3)     go to 301
-         if(dabs(ttt(i)-ttt(j)).le.1.d-3)   go to 301
+         if(dabs(ttt(i)-ttt(j)).lt.ttdmin .and.
+     +      phase_type(phaseu(i)).eq.phase_type(phaseu(j)))   go to 301
 
          if(((tt(j).gt.tt(i)) .and. (ttt(j).lt.ttt(i))) .or.
      +       ((tt(i).gt.tt(j)) .and. (ttt(i).lt.ttt(j)))   )  go to 301
@@ -5744,8 +6080,8 @@ c
            a(jj,1) = 0.d0
            a(jj,2) = datla(j) - datla(i)
            a(jj,3) = datlo(j) - datlo(i)
-
            a(jj,4) = datho(j) - datho(i)
+
            if(dabs(a(jj,4)).lt.1.d-5) then
               a(jj,4)=0.d0
            else
@@ -5753,11 +6089,15 @@ c
            endif
 
            dinv(i,4) = dble(jj) + dble(ndt)*1.D-3
+           if(j.eq.nobs) dinv(j,4) = dble(jj) + dble(ndt)*1.D-3
+
+           used(i)(4:4) = 'D'
+           used(j)(4:4) = 'D'
 
            if(typctl.gt.5) then
               print *,jj,' dt ',i,j,phaseu(i),phaseu(j),a(jj,1),a(jj,2),
      +                a(jj,3),a(jj,4),dat(jj),dats(jj),used(i),used(j),
-     +                dtm0,fixinp
+     +                dtm0,fixinp,sta(iev(i))
            endif
 
           endif
@@ -5783,26 +6123,23 @@ c
 
       if(czo.eq.'D') then
 
-        if(nobs.lt.4 .or. jdt.lt.4) then
-           if(zo/(deg2rad*radloc(stala(istatmin),1)).lt.0.25d0 .and. 
-     +        iter.gt.2) then
-             if( zoflag ) go to 9998
-             zo = dmax1(0.d0,depthmin)
-             czo = 'B'
-             lcomfix = .true.
-             rs(4)  = 1.d0
-             var(4) = 0.d0
-             if(typctl.gt.0) then
-                print *,'(1) No depth resolution, fixed at',zo,' [km]'
-             endif
-
-             if(output) then
-                write(11,'(/''No resolution for depth, fixed at''
-     +                      ,f7.2)') zo
-             endif
-
-             go to 101
+        if((nobs.lt.4 .or. jdt.lt.4) .and.iter.gt.10) then
+           if( zoflag ) go to 9998
+           zo = dmax1(0.d0,depthmin)
+           czo = 'B'
+           lcomfix = .true.
+           rs(4)  = 1.d0
+           var(4) = 0.d0
+           if(typctl.gt.0) then
+              print *,'(1) No depth resolution, fixed at',zo,' [km]'
            endif
+
+           if(output) then
+              write(11,'(/''No resolution for depth, fixed at''
+     +                    ,f7.2)') zo
+           endif
+
+           go to 101
         endif
 
         im = 4
@@ -5862,22 +6199,22 @@ c
 
 c               print *,' ---> [delazd] B',stala(iev(jref)),
 c     +              stalo(iev(jref)),azim,ddel,inddel,
-c     +              elatmg,elonm
+c     +              elatm,elonm
                
                call delazd(stala(iev(jref)),stalo(iev(jref)),azim,
-     +                     ddel,inddel,elatmg,elonm)
+     +                     ddel,inddel,elatm,elonm)
                
 c               print *,' ---> [delazd] A',stala(iev(jref)),
 c     +              stalo(iev(jref)),azim,ddel,inddel,
-c     +              elatmg,elonm
+c     +              elatm,elonm
 
 
-               elatm = convlat(elatmg,1)
+               elatmg = convlat(elatm,1)
 
                if(lwdepth ) then
-                   water = wdepth(elatmg,elonm)
+                   water = wdepth(elatm,elonm)
                    if(water.gt.zo) then
-                      zo = dble(dnint(water+0.5d0))
+                      zo = dble(idnint(water+0.5d0))
                       rayok = .false.
                       if(typctl.gt.4) then
                          print *, 'water depth at source:', water,' km'
@@ -5901,7 +6238,7 @@ c     +              elatmg,elonm
                   endif
                endif
 
-               sdlatg = 45.d0/ray
+               sdlat = 45.d0/ray
                sdlon  = 90.d0/ray
 
                tome = tt(jref) + timemin - ttray
@@ -5915,7 +6252,7 @@ c     +              elatmg,elonm
      +                   '' deg, delta'',f7.2,'' deg'')') sta(iev(jref))
                   endif
                   write(11,'(''Epicenter lat:'',f9.3,'' [deg]'')')  
-     +              elatmg
+     +              elatm
                   write(11,'(''Epicenter lon:'',f9.3,'' [deg]''/)') 
      +                     elonm
                   write(11,'(''Source time set to: '',f15.2)') tome
@@ -5953,11 +6290,11 @@ c     +              elatmg,elonm
            tom     = dtos(ilas)
            tome    = tom + timemin
            elonm   = dloos(ilas)
-           elatm   = dlaos(ilas)
-           elatmr  = deg2rad*elatm
-           elatmg  = convlat(elatm,2)
-           coelatm = 90.d0 - elatm
-           coelatmr= deg2rad*coelatm
+           elatmg   = dlaos(ilas)
+           elatmgr  = deg2rad*elatmg
+           elatm  = convlat(elatmg,2)
+           coelatmg = 90.d0 - elatmg
+           coelatmgr= deg2rad*coelatmg
 
          endif
 
@@ -5966,7 +6303,7 @@ c     +              elatmg,elonm
          dtm0   = dtms
          dazim  = dazim * 2.0d0
          dpam   = dpam * 2.0d0
-         datmax0 = datmax0 * 10.d0
+         datmax0 = datmax * 10.d0
 
          if(typctl.ge.4) then
             print *, 'Inversion matrix error: in = ',in
@@ -5999,10 +6336,10 @@ c
         inddel = 1
         call delazd(stala(1),stalo(1),azi(1),deln,inddel,elat1,elon1)
 
-        elatm1 = convlat(elat1,1)
+        elatmg1 = convlat(elat1,1)
 
         r(1) = dat(1)
-        r(2) = elatm1 - elatm
+        r(2) = elatmg1 - elatmg
         r(3) = elon1 - elonm
         r(4) = 0.d0
 
@@ -6114,8 +6451,8 @@ c
               insar = insar + 1
               inddel = 1
               call delazd(stala(1),stalo(1),azi(1),ddel,inddel,
-     +              elatmg,elonm)
-              elatm = convlat(elatmg,1)
+     +              elatm,elonm)
+              elatmg = convlat(elatm,1)
 
               phaseu(1) = phase(1)
 C Close origin group before jumping out
@@ -6218,17 +6555,36 @@ c
       if(im.eq.4) then
 
         ar4 = dabs(r(4))
-        if(ar4.ge.300d0 ) then
+        if(ar4.ge.300.d0 ) then
            f1 = 0.d0
            f2 = 0.d0
            if(czo.eq.'D') then
               czo='B'
-              if(output)
-     +           write(11,'(/''No resolution for depth, fixed at''
-     +                   ,f7.2)') zo
-              if(typctl.gt.0) 
-     +           print *,'No resolution for depth, fixed at ',zo
+
+              if(output) then
+                if(ldefisc) then
+                  write(11,'(/''No resolution for free depth, '',
+     +                   ''fixed as defined by DEPTH FLAG'')') 
+                else
+                  write(11,'(/''No resolution for free depth, '',
+     +                   ''fixed at'',f7.2)') zo
+                endif
+              endif
+
+              if(typctl.gt.0)  then
+                if(ldefisc) then
+                  print *,'No resolution for free depth, fixed as',
+     +                   ' defined by DEPTH FLAG' 
+                else
+                  print *,'No resolution for free depth, fixed at ',zo
+                endif
+              endif
+
               iterz = iterz + 1
+
+c             print *, 'Depth (0)',zo,r(4),iterz
+
+              go to 306
            endif
         else if(ar4.gt.200.d0 .and.ar4.lt.300d0 ) then
            f1 = 128.175d0
@@ -6254,7 +6610,7 @@ c
 
         zo = zo + depuse
 
-c       print *, 'Depth (1)',zo,r40,r(4),depuse
+c       print *, 'Depth (1)',zo,r40,r(4),depuse, dchang
 
         if(var(4).gt.1.d-5) then
            rs(4) = var(4)
@@ -6288,11 +6644,14 @@ c       print *, 'Depth (2)',zo,r40,r(4),depuse
 c       print *, 'Depth (3)',zo,r40,r(4),depuse,tome,r(1)
 
       endif
+
+306   continue
+
 c
 c     save the old epicenter solution 
 c
-      elatmgo = elatmg
-      elonmo  = elonm
+      elatmo = elatm
+      elonmo = elonm
 
 c
 c     the new epicenter and source time
@@ -6303,33 +6662,33 @@ c
       if(r(2).lt.-180.d0) r(2) = -180.d0
       if(r(3).lt.-180.d0) r(3) = -180.d0
 
-      elatt = elatm + r(2)*dchang
+      elattg = elatmg + r(2)*dchang
       elont = elonm + r(3)*dchang
 
       elont = alpha1(elont)
 
       ilon = 0
-      if(elatt.gt. 90.d0) then
-         elatt = 180.d0 - elatt
+      if(elattg.gt. 90.d0) then
+         elattg = 180.d0 - elattg
          ilon  = 1
-      else if(elatt.lt.-90.d0) then
-         elatt = -(elatt + 180.d0)
+      else if(elattg.lt.-90.d0) then
+         elattg = -(elattg + 180.d0)
          ilon  = 1
       endif
-      elattg= convlat(elatt,2)
+      elatt= convlat(elattg,2)
 
       if(ilon.eq.1) elont = alpha1(elont+180.d0)
 
-      call depi(elattg,elont,elatmgo,elonmo,delta,dk,ep2,ep1,d2km)
+      call depi(elatt,elont,elatmo,elonmo,delta,dk,ep2,ep1,d2km)
 
       r10 = dabs(r(1))
 
       if(iter.le.5) then
 
          if(delta.le.10.d0 .or. single) then
-            elatm = elatt
+            elatmg = elattg
             elonm = elont
-            elatmg =  convlat(elatm,2)
+            elatm =  convlat(elatmg,2)
          else 
             deltn = 0.d0
             if(delta.le.30.0d0) then
@@ -6338,8 +6697,8 @@ c
                deltn = 20.d0
             endif
             inddel = 1
-            call delazd(elatmgo,elonmo,ep2,deltn,inddel,elatmg,elonm)
-            elatm = convlat(elatmg,1)
+            call delazd(elatmo,elonmo,ep2,deltn,inddel,elatm,elonm)
+            elatmg = convlat(elatm,1)
          endif
 
          if(r10.lt.140.d0) then
@@ -6358,9 +6717,9 @@ c
       else
 
          if(delta.le.2.d0 .or. single) then
-            elatm = elatt
+            elatmg = elattg
             elonm = elont
-            elatmg =  convlat(elatm,2)
+            elatm =  convlat(elatmg,2)
          else 
             deltn = 0.d0
             if(delta.le.8.0d0) then
@@ -6369,8 +6728,8 @@ c
                deltn = 5.d0
             endif
             inddel = 1
-            call delazd(elatmgo,elonmo,ep2,deltn,inddel,elatmg,elonm)
-            elatm = convlat(elatmg,1)
+            call delazd(elatmo,elonmo,ep2,deltn,inddel,elatm,elonm)
+            elatmg = convlat(elatm,1)
          endif
 
          if(r10.lt.35.d0) then
@@ -6397,16 +6756,16 @@ c
       tome    = tome + r12*dchang 
 
       if(ldefisc .and. (czo.eq.'F' .or. czo.eq.'B')) then
-         call def_depth(defdep,elatmg,elonm,idetyp,ldefd,c1typ,ideptyp)
+         call def_depth(defdep,elatm,elonm,idetyp,ldefd,c1typ,ideptyp)
          call zo2to(defdep-zo,tome,var(1))
          zo = defdep
       endif
  
       if(lwdepth ) then
-         water = wdepth(elatmg,elonm)
+         water = wdepth(elatm,elonm)
          if(water .gt. zo ) then
             call zo2to(water-zo,tome,var(1))
-            zo = dble(dnint(water+0.5d0))
+            zo = dble(idnint(water+0.5d0))
             if(typctl.gt.4) then
                print *, 'water depth at source:', water,' km'
                print *, 'depth fixed at: ',zo,' km'
@@ -6420,12 +6779,12 @@ c
 
       tom     = tome - timemin
 
-      elatmr  = deg2rad*elatm
-      sdlatg  = var(2) /( eps*q2(dcos(elatmr))  + q2(dsin(elatmr)) )
+      elatmgr  = deg2rad*elatmg
+      sdlat  = var(2) /( eps*q2(dcos(elatmgr))  + q2(dsin(elatmgr)) )
 
 
-      coelatm = 90.d0 - elatm
-      coelatmr= deg2rad*coelatm
+      coelatmg = 90.d0 - elatmg
+      coelatmgr= deg2rad*coelatmg
 
       if(var(1).gt. 1.d-3) rs(1) = var(1)
       if(rs(1).gt.250.d0) rs(1) = 250.d0
@@ -6455,7 +6814,7 @@ c
       if(iter.le.mosci) then
 
         dtos(iter)  = tom
-        dlaos(iter) = elatm
+        dlaos(iter) = elatmg
         dloos(iter) = elonm
         dlo1os(iter)= dcos(deg2rad*elonm)
         dlo2os(iter)= dsin(deg2rad*elonm)
@@ -6475,7 +6834,7 @@ c
 c     The change in the horizontal plane (the epicenter)
 
       dk = 0.d0
-      call depi (elatmg,elonm,elatmgo,elonmo,del3,dk,ep2,ep1,d2km)
+      call depi (elatm,elonm,elatmo,elonmo,del3,dk,ep2,ep1,d2km)
 
 c     The change in source time is compensated eventually by a
 c     change in depth
@@ -6485,7 +6844,7 @@ c     change in depth
 
       check = dpythag(dtokm,dk)
 
-      call depi(elatmg,elonm,stala(istatmin),stalo(istatmin),del3,
+      call depi(elatm,elonm,stala(istatmin),stalo(istatmin),del3,
      +                    dk,ep2,ep1,d2km)
 
       ilastiter = 0
@@ -6526,16 +6885,16 @@ c     change in depth
 
                      do 363 j3=1,nobs
                         do 361 j4=1,4
-                           if(int(dinv(j3,j4)).eq.j) then
+                           if(idint(dinv(j3,j4)).eq.j) then
                               if(j4.le.3) then
                                used(j3)(j4:j4) = ' '
                               else
-                               idum = int( (dinv(j3,4)-
-     +                                int(dinv(j3,4)))*1000.d0+0.01d0)
+                               idum = idint( (dinv(j3,4)-
+     +                                idint(dinv(j3,4)))*1000.d0+0.01d0)
                                idtu(idum) = 0
                               endif
                               dinv(j3,j4)   = 0.d0
-                              ndt = ndt - 1
+                              if(j4.eq.4) ndt = ndt - 1
                               go to 365
                            endif
 361                     continue
@@ -6559,7 +6918,7 @@ c     change in depth
                var(4) = 0.d0
 
                if(ldefisc) then
-                  call def_depth(defdep,elatmg,elonm,idetyp,ldefd,c1typ,
+                  call def_depth(defdep,elatm,elonm,idetyp,ldefd,c1typ,
      +                 ideptyp)
 
                   call zo2to(defdep-zo,tome,var(1))
@@ -6654,12 +7013,12 @@ c    +         ' moscil,',moscil
 
            if( dabs(dzoos(i)-zo).le.rminh            .and.
      +         dabs(dtos(i)-tom).le.rmint            .and.
-     +         dabs(dlaos(i)-elatm).le.rming         .and.
+     +         dabs(dlaos(i)-elatmg).le.rming         .and.
      +         dabs(alpha1(dloos(i)-elonm)).le.rming        ) then
 
                mosci2 = i
 c              print *,dzoos(i)-zo,rminh,dtos(i)-tom,rmint,
-c    +          dlaos(i)-elatm,dloos(i)-elonm,rming
+c    +          dlaos(i)-elatmg,dloos(i)-elonm,rming
                go to 371
 
            endif
@@ -6709,7 +7068,7 @@ c
 
                 if(zmax1-zmin.gt.1.d-5) then
                   if(ldefisc) then
-                    call def_depth(defdep,elatmg,elonm,idetyp,ldefd,
+                    call def_depth(defdep,elatm,elonm,idetyp,ldefd,
      +                             c1typ,ideptyp)
                     zo   = defdep
                     if(output) then
@@ -6748,13 +7107,13 @@ c
          rs(1) = ddmax(rtos,moscil,mosci2)
          if(rs(1).lt.1.d-3) rs(1) = sdto
 
-         elatm = dmean(dlaos,moscil,mosci2)
-         elatmr= deg2rad*elatm
-         elatmg  = convlat(elatm,2)
-         coelatm = 90.d0 - elatm
-         coelatmr= deg2rad*coelatm
+         elatmg = dmean(dlaos,moscil,mosci2)
+         elatmgr= deg2rad*elatmg
+         elatm  = convlat(elatmg,2)
+         coelatmg = 90.d0 - elatmg
+         coelatmgr= deg2rad*coelatmg
          rs(2) = ddmax(rlaos,moscil,mosci2)
-         if(rs(2).lt.1.d-5) rs(2) = sdlat
+         if(rs(2).lt.1.d-5) rs(2) = sdlatg
 
          elonm1= dmean(dlo1os,moscil,mosci2)
          elonm2= dmean(dlo2os,moscil,mosci2)
@@ -6813,7 +7172,7 @@ c
             iterz = iterz + 1
 
             if(ldefisc) then
-               call def_depth(defdep,elatmg,elonm,idetyp,ldefd,c1typ,
+               call def_depth(defdep,elatm,elonm,idetyp,ldefd,c1typ,
      +                        ideptyp)
                call zo2to(defdep-zo,tome,var(1))
                if(var(1).gt. 1.d-3) rs(1) = var(1)
@@ -6896,7 +7255,7 @@ c
                  endif
 
                  if(ldefisc) then
-                    call def_depth(defdep,elatmg,elonm,idetyp,ldefd,
+                    call def_depth(defdep,elatm,elonm,idetyp,ldefd,
      +                             c1typ,ideptyp)
                     call zo2to(defdep-zo,tome,var(1))
                     if(var(1).gt. 1.d-3) rs(1) = var(1)
@@ -6951,7 +7310,7 @@ c
 381     continue
 
         dtos(mosci)  = tom
-        dlaos(mosci) = elatm
+        dlaos(mosci) = elatmg
         dloos(mosci) = elonm
         dlo1os(mosci)= dcos(deg2rad*elonm)
         dlo2os(mosci)= dsin(deg2rad*elonm)
@@ -6968,12 +7327,12 @@ c
 390   if(typctl.ge.4) then
          print*,'Iteration: ',iter,'   # of def.: ',in
          print*,'New source time  : ',tome,' +/- ',var(1)
-         print*,'New epicenter lat: ',elatmg,' +/- ',sdlatg
+         print*,'New epicenter lat: ',elatm,' +/- ',sdlat
          print*,'New epicenter lon: ',elonm,' +/- ',var(3)
          print*,'New source depth : ',zo,' +/- ',var(4)
       endif
 c
-      if(iter.gt.nint(maxiter*0.75) .and. imaxiter.lt.5 .and.
+      if(iter.gt.nint(real(maxiter)*0.75) .and. imaxiter.lt.5 .and.
      +   ilastiter.eq.0) then
 
 c
@@ -6983,7 +7342,7 @@ c     4 solutions as new initial solution.
 c
 
          imaxiter = imaxiter + 1
-         maxiter  = maxiter + nint(maxiter*0.25/imaxiter)
+         maxiter  = maxiter + nint(real(maxiter)/real(imaxiter)*0.25)
 
          if(czo.eq.'D') then
  
@@ -6998,13 +7357,13 @@ c
          rs(1) = ddmax(rtos,mosci,1)
          if(rs(1).le.1.d-3) rs(1) = sdto
  
-         elatm = dmean(dlaos,mosci,1)
-         elatmr= deg2rad*elatm
-         elatmg  = convlat(elatm,2)
-         coelatm = 90.d0 - elatm
-         coelatmr= deg2rad*coelatm
+         elatmg = dmean(dlaos,mosci,1)
+         elatmgr= deg2rad*elatmg
+         elatm  = convlat(elatmg,2)
+         coelatmg = 90.d0 - elatmg
+         coelatmgr= deg2rad*coelatmg
          rs(2) = ddmax(rlaos,mosci,1)
-         if(rs(2).le.1.d-4) rs(2) = sdlat
+         if(rs(2).le.1.d-4) rs(2) = sdlatg
  
          elonm1= dmean(dlo1os,mosci,1)
          elonm2= dmean(dlo2os,mosci,1)
@@ -7078,7 +7437,7 @@ c
       du0 = 0.d0
       du1 = 0.d0
       idum = 2
-      call elpcor('P',du0,du0,coelatmr,du0,du1,eflag,idum)
+      call elpcor('P',du0,du0,coelatmgr,du0,du1,eflag,idum)
 
       if(output) then
          write(11,'(/''Iterations        :'',i5)') iter
@@ -7179,8 +7538,8 @@ c
       var2(1) = fchi1 * var(1)
       if(var2(1).gt.9999.999d0) var2(1) = 9999.999d0
 
-      f1      = var(2) /( eps*q2(dcos(elatmr))+q2(dsin(elatmr)) ) 
-      sdlatg  = fchi1 * f1
+      f1      = var(2) /( eps*q2(dcos(elatmgr))+q2(dsin(elatmgr)) ) 
+      sdlat  = fchi1 * f1
 
       var2(3) = fchi1 * var(3)
 
@@ -7194,18 +7553,18 @@ c
      +         f7.2,'' %'')') confl
 
          if(kmout) then
-            if(disminst.gt.0.d0 .and. dismaxst.ge.20100.d0) then
+            if(disminst.gt.0.d0 .and. dismaxstk.ge.20100.d0) then
                write(11,'(/''Location for observations at distances '',
-     +               ''larger than'',f8.1,'' [km]'')') disminst
+     +               ''larger than'',f8.1,'' [km]'')') disminstk
             endif
-            if(disminst.le.0.d0 .and. dismaxst.lt.20100.d0) then
+            if(disminst.le.0.d0 .and. dismaxstk.lt.20100.d0) then
                write(11,'(/''Location for observations at distances '',
-     +               ''shorter than'',f8.1,'' [km]'')') dismaxst
+     +               ''shorter than'',f8.1,'' [km]'')') dismaxstk
             endif
-            if(disminst.gt.0.d0 .and. dismaxst.lt.20100.d0) then
+            if(disminst.gt.0.d0 .and. dismaxstk.lt.20100.d0) then
                write(11,'(/''Location for observations at distances '',
      +               ''between'',f8.1,'' and'',f8.1,'' [km]'')') 
-     +               disminst,dismaxst
+     +               disminst,dismaxstk
             endif
          else
             if(disminst.gt.0.d0 .and. dismaxst.ge.180.d0) then
@@ -7244,17 +7603,17 @@ c
 
       if(var2(1).gt.zo/6.d0 .and. czo.eq.'D') ibad = ibad + 1
 
-      if(sdlatg.lt.45.d0) then
+      if(sdlat.lt.45.d0) then
          if(output) then
             write(11,'(''Epicenter lat:'',14x,f10.4,'' +/- '',f8.4,
-     +              '' [deg]'')')  elatmg,sdlatg
+     +              '' [deg]'')')  elatm,sdlat
          endif
       else
          ibad = ibad + 1
-         if(sdlatg.gt.180.d0) sdlatg = 180.d0
+         if(sdlat.gt.180.d0) sdlat = 180.d0
          if(output) then
             write(11,'(''Epicenter lat:'',14x,f10.4,'' +/- '',f8.4,
-     +              '' [deg] (no resolution!)'')') elatmg,sdlatg
+     +              '' [deg] (no resolution!)'')') elatm,sdlat
          endif
       endif
 
@@ -7265,7 +7624,7 @@ c
          endif
       else
          if(var2(3).gt.180.d0) var2(3) = 180.d0
-         if(elatmg+sdlatg.gt.89.d0 .or. elatmg-sdlatg.lt.-89.d0) then
+         if(elatm+sdlat.gt.89.d0 .or. elatm-sdlat.lt.-89.d0) then
            if(output) then
               write(11,'(''Epicenter lon:'',14x,f10.4,'' +/- '',f8.4,
      +              '' [deg] (not well defined, source too close '',
@@ -7418,53 +7777,21 @@ c
       dtmin     = 9999.d0
       dtnew2    = 9999.d0
 
-      if(phase(i).eq.'P1      ' .or. phase(i).eq.'S1      ') then
-         firston= .true.
-      else
-         firston= .false.
-      endif
+c     print *,'---> (e--0) ', i,sta(iev(i)),': ',phase(i),phaseu(i),
+c    +        used(i),touse(i)
 
-c     print *,'---> (e--0) ', i,sta(iev(i)),phase(i),phaseu(i),used(i),
-c    +        firston,touse(i)
+      if(.not.toreset) then
+         if(phaseu(i).eq.' ' .and. touse(i)(1:1).ne.' ') 
+     +      phaseu(i) = 'x'
 
-      if(phaseu(i).eq.'P1      ' .or. phaseu(i).eq.'S1      ' .or.
-     +   (phaseu(i).eq.' '.and. touse(i)(1:1).ne.' ')  )
-     +    phaseu(i) = 'x'
-
-      if(phase(i)(1:3).eq.'tx ') then
-         phaseu(i)    = 'x'
-         used(i)(1:1) = ' '
-         used(i)(3:5) = '   '
-      endif
-
-      chgcas = uppcas(phaseu(i)(1:1))
-      cdum = chgcas(1:1)
-
-      if((cdum.ne.'P' .and. cdum.ne.'S' .and. cdum.ne.'R' .and.
-     +    cdum.ne.'L' ) .or. used(i)(1:1).eq.' ') go to 413
-
-c
-c     Mark all phases, which have been used as part of a defining
-c     travel-time difference measure.
-c
-      do 412 j = i+1,nobs
-
-         if(iev(i).ne.iev(j)) go to 412
-
-         chgcas = uppcas(phaseu(j)(1:1))
-         cdum = chgcas(1:1)
-         if((cdum.ne.'P' .and. cdum.ne.'S' .and. cdum.ne.'R' .and.
-     +       cdum.ne.'L' ) .or. used(j)(1:1).eq.' ') go to 412
-
-         if(phaseu(i).eq.phaseu(j)) go to 412
-         if(idtu(i3).eq.(j*i + j+i)) then
-            used(i)(4:4) = 'D'
-            used(j)(4:4) = 'D'
-            i3 = i3 + 1
+         if(phase(i)(1:3).eq.'tx ') then
+            phaseu(i)    = 'x'
+            used(i)(1:1) = ' '
+            used(i)(3:5) = '   '
          endif
-412   continue
+      endif
 
-413   useds = used(i)
+      useds = used(i)
       usedm = ' '
       usedsr = ' '
 
@@ -7474,7 +7801,7 @@ c
 
          stato = sta(iev(i))
 
-         call depi(stala(iev(i)),stalo(iev(i)),elatmg,elonm,
+         call depi(stala(iev(i)),stalo(iev(i)),elatm,elonm,
      +              del(iev(i)),delk(iev(i)),azie(iev(i)),baz(iev(i)),
      +        d2km)
          rzo   = sngl(zo)
@@ -7485,7 +7812,7 @@ c
          if(rdel.lt.rdmi) rdmi = rdel
          if(rdel.gt.rdma) rdma = rdel
 
-         fla1 = deg2rad*(90.d0-elatm)
+         fla1 = deg2rad*(90.d0-elatmg)
          razi = sngl(azie(iev(i)))
 
          if(isf_in.and.delta.ge.disfmod.and.modflag(2)) then
@@ -7517,7 +7844,7 @@ c
 
            ierr = 0
            indph = istaph(iev(i))*10000 + indph0
-           elatc = elatmg
+           elatc = elatm
            elonc = elonm
 
            elat2 = stala(iev(i))
@@ -7573,7 +7900,11 @@ c
       phid1 = ' '
       phid2 = ' '
 
-      if(phaseu(i).ne.' ') then
+c     if(phaseu(i).ne.' ' .and. phaseu(i).ne.'x' .and. 
+c    +   used(i)(1:3).ne.' ') then
+
+      if(phaseu(i).ne.' ' .and. phaseu(i).ne.'x') then
+
          phid = phaseu(i)
 
          ic = index(phid,'w')
@@ -7584,6 +7915,10 @@ c
       else
 
          phid = phase(i)
+         ic = index(phid,'w')
+         if(ic.gt.0) then
+            phid(ic:8) = phase(i)(ic+1:8) // ' '
+         endif
 
       endif
 
@@ -7642,15 +7977,6 @@ c
       if(phase(i).eq.'tx rx' .and. delta.gt.25.d0) goto 433
       if(phase(i).eq.'tx tx' .and. delta.lt.10.d0) goto 433
 
-      imin = 0
-      phsearch = ' '
-      if(index(phase(i),'x').gt.0 .or. index(phaseu(i),'x').gt.0) then
-         ttt(i) = 0.d0
-         imin = 1
-         if(index(phase(i),'P').gt.0) phsearch = 'P'
-         if(index(phase(i),'S').gt.0) phsearch = 'S'
-      endif
-
       surf = .false.
  
       if(phid.eq.'Rg') then
@@ -7683,6 +8009,15 @@ c
          vsurf = vi
       endif
 
+      imin = 0
+      phsearch = '_'
+      if(index(phase(i),'x').gt.0 .or. index(phaseu(i),'x').gt.0) then
+         ttt(i) = 0.d0
+         imin = 1
+         if(index(phase(i),'P').gt.0) phsearch = 'P'
+         if(index(phase(i),'S').gt.0) phsearch = 'S'
+      endif
+
       if(surf .and. phid.ne.'Lg') then
          nphas       = nphas + 1
          ttc(nphas)  = delk(iev(i))/vsurf
@@ -7700,11 +8035,14 @@ c
                 
 418   continue
 
-c     print *,'---> (e-0) ', i,phase(i),phid,phaseu(i),useds,surf,icha
+c     print *,'---> (e-0) ',i,sta(iev(i)),
+c    +        phase(i),phid,phaseu(i),useds,surf,icha,phsearch,imin
 
       surff = surf
       first2 = .false.
       j = 0
+
+      phase_tu = phase_type(phaseu(i))
 
       do 420 j1 = 1,nphass
 
@@ -7717,7 +8055,10 @@ c
       phid1 = phcd(j)
 
       phase_t = phase_type(phid1)
-      if(phsearch.ne.' ' .and. phsearch.ne.phase_t) go to 420
+
+      if(phsearch.ne.'_' .and. phsearch.ne.phase_t) go to 420
+
+      if(phase_t.ne.phase_tu .and. phase_tu.ne.' ') go to 420
 
       dpa   = 0.d0
       dpaa  = 0.d0
@@ -7725,12 +8066,8 @@ c
 
       if(phid1.eq.phid .or. imin.gt.0 ) then
 
-c     print *,'---> (e-1) ',i,phase(i),phid,phid1,phaseu(i),useds,
-c    +                     imin,surf,icha
-
-c
-c     checking : any ellipticity correction for this phase?
-c
+c     print *,'---> (e-1) ',i,phase(i),phid,j1,j,phid1,phaseu(i),useds,
+c    +                     imin,surf,icha,touse(i),sta(iev(i))
 
          if(phid1(1:1).eq.'L' .or. phid1(1:1).eq.'R' .or.
      +      phid1(1:1).eq.'T' .or. phid1(1:1).eq.'I')
@@ -7750,6 +8087,10 @@ c
             if(dabs(p(i)-dpaa) .ge. 0.01d0) go to 420
 
          endif
+
+c
+c     checking : any ellipticity correction for this phase?
+c
 
          ecor = 0.d0
 
@@ -7842,7 +8183,7 @@ c    +              indr,hsta,elev,stael(iev(i)),loctt,imo
 
               if(phin.lt.1.d0) then
 
-                 dl = hsta / dcos(dasin(phin))
+                 dl = hsta / dcos(fcheck(phin,1))
 
                  ddis2 = q2(dl)-q2(hsta)
                  if(ddis2.lt.1.d-3) ddis2 = 0.d0
@@ -7960,7 +8301,7 @@ c
             if(del0.gt.rmax0 .and. (imo.eq.1 .or. imo.eq.5)) go to 415
 
             inddel = 1
-            call delazd(elatmg,elonm,azi0,del0,inddel,elatc,elonc)
+            call delazd(elatm,elonm,azi0,del0,inddel,elatc,elonc)
     
 c
 c     correction for depth phases (e.g.: pP, pwP, sS...)
@@ -8149,20 +8490,8 @@ c
          endif
 
          ttres1 = dabs(ttc(j) - ttc(1))
-         if(rdel.gt.113. .and. phcd(1)(1:3).eq.'Pdi' .and.
-     +                         ttres1.gt.50.d0        ) then
-           if(phcd(2)(1:2).eq.'PK' .and. j.ge.2) then
-              ttres1 = dabs(ttc(j) - ttc(2))
-              go to 419
-           else if(phcd(3)(1:2).eq.'PK' .and. j.ge.3) then
-              ttres1 = dabs(ttc(j) - ttc(3))
-              go to 419
-           else if(phcd(4)(1:2).eq.'PK' .and. j.ge.4) then
-              ttres1 = dabs(ttc(j) - ttc(4))
-           endif
-         endif
 
-419      if(dabs(ttres).lt.dabs(dtmin)) then
+         if(dabs(ttres).lt.dabs(dtmin) .or. imin.eq.0) then
             phid2 = phid1
             dtmin = ttres
             dtnew2 = dtnew
@@ -8174,31 +8503,21 @@ c
             usedsr = usedr
             tttm  = tttn
             surfm = surff
+            if(imin.eq.0) go to 423
          endif
-
-         if(useds(1:1).eq.'2' .or. useds(1:1).eq.'3') then
-            do 4191  j2 = j+1,nphass
-               if(phid .eq. phcd(j2)) then
-                 j = j2 - 1
-                 go to 420
-               endif
-4191        continue
-         endif
-
-         if(imin.eq.0 ) go to 422
 
       endif
 
 420   continue
 
-421   if(icha.ge.99 .or.imin.gt.0) go to 422
+421   if(icha.ge.99 .and. imin.gt.0) go to 422
 
       if((dabs(dtmin).gt.999.d0 .or. dtnew2.ge.1.d0) .and.
      +   (usedm(1:1).ne.' ' .or. usedm(4:4).ne.' ') .and. 
-     +    .not.llimdel ) then
+     +    .not.llimdel) then
          phid0 = phid
          call testphase (phid0,icha,delta)
-         if(phid0.ne.phid .and. icha.lt.99) then
+         if(phid0.ne.phid) then
             phid = phid0
             go to 418
          endif
@@ -8260,6 +8579,7 @@ c    +                     imin,surf,icha,dtmin,dtnew2
 430   continue
 
       if(useds(1:1).eq.'T' .or. useds(1:1).eq.'2') then
+         useds(1:1) = 'T'
          stmean  = stmean + ttres
          strmean = strmean + dabs(ttres)
          rms     = rms    + q2(ttres)
@@ -8306,9 +8626,9 @@ c
      +              (rearth-zo)
               if(dabs(fac).le.1.d0) then
                  if(dtdz.lt.0.d0) then
-                    emeran(i) = rad2deg*dasin(fac)
+                    emeran(i) = rad2deg*fcheck(fac,1)
                  else if(dtdz.gt.0.d0) then
-                    emeran(i) = 180.d0 - rad2deg*dasin(fac)
+                    emeran(i) = 180.d0 - rad2deg*fcheck(fac,1)
                  else
                     emeran(i) = 90.d0
                  endif
@@ -8500,7 +8820,7 @@ c    +         fac,emeran(i)
 
             if(statmag.eq. 'ML') then
 
-               if(tres.ge.-10.d0 .and. tres.lt.60.d0 ) then
+               if(ttres.ge.-10.d0 .and. ttres.lt.60.d0 ) then
                   if(delta.ge.delmlmin .and. delta.le.delmlmax) then
                      imlm = imlm + 1
                      if(dmag.gt.staml(iev(i))) staml(iev(i)) = dmag
@@ -8621,6 +8941,7 @@ c    +         fac,emeran(i)
 
          endif
 
+         toreset = .true.
          go to 405
 
       endif
@@ -8638,9 +8959,9 @@ c    +         fac,emeran(i)
       earea = 9.99d6
       if(iellip .and. .not.last) then
 
-         call ellcal(elatmg,ax1,ax2,eps,fchi2,elmax,elmin,eazi,earea)
+         call ellcal(elatm,ax1,ax2,eps,fchi2,elmax,elmin,eazi,earea)
 
-c            print *,iellip,single,iellip1,nq,elatmg,ax1,ax2,fchi2,
+c            print *,iellip,single,iellip1,nq,elatm,ax1,ax2,fchi2,
 c    +       elmax,elmin,eazi,earea,var(2),var(3)
 
          if(output) then
@@ -8672,7 +8993,7 @@ c    +       elmax,elmin,eazi,earea,var(2),var(3)
            call json_end_group(json_rc)
          endif
 
-c        radsource = radloc(elatmg,1)
+c        radsource = radloc(elatm,1)
 c        print *,'Earth radius in source region: ',radsource
 
       else if(iellipi.eq.1 .and. .not.iellip) then
@@ -8686,7 +9007,7 @@ c        print *,'Earth radius in source region: ',radsource
 
       endif
 
-      rlat = sngl(elatmg)
+      rlat = sngl(elatm)
       rlon = sngl(elonm)
       call hyposat_geo( rlat,rlon, isreg, regnum, region , ierr )
 
@@ -8821,7 +9142,7 @@ c       write(12,'(a)') cdum
         if(relmin.lt.0.) relmin = 0.
         if(relmin.gt.9999.) relmin = 9999.
 
-        ieazi = nint(eazi)
+        ieazi = idnint(eazi)
         if(ieazi.lt.0) ieazi = 0
 
         if(var2(1).gt.999.9d0) var2(1) = 999.9d0
@@ -8839,7 +9160,7 @@ c       write(12,'(a)') cdum
         if(czo.eq.'D') then
 
            itest = write_origin(12,yy,mon,dd,hh,mi,isec,msec,cdum,
-     +     real(var2(1)),real(rmsisf),real(elatmg),real(elonm),cdum,
+     +     real(var2(1)),real(rmsisf),real(elatm),real(elonm),cdum,
      +     relmax,relmin,ieazi,real(zo),cdum,
      +     real(var2(4)),in,nstata,nint(dazgap),rdmi,rdma,cduma,cdumi,
      +     cdum3,author,corid)
@@ -8852,7 +9173,7 @@ c       write(12,'(a)') cdum
 
            cfi = 'f'
            itest = write_origin(12,yy,mon,dd,hh,mi,isec,msec,cdum,
-     +     real(var2(1)),real(rmsisf),real(elatmg),real(elonm),cdum,
+     +     real(var2(1)),real(rmsisf),real(elatm),real(elonm),cdum,
      +     relmax,relmin,ieazi,real(zo),cfi,rdum,
      +     in,nstata,nint(dazgap),rdmi,rdma,cduma,cdumi,
      +     cdum3,author,corid)
@@ -9405,8 +9726,16 @@ c
          if(used(j)(4:4).ne.'D') go to 460
 
          if(iev(i).ne.iev(j)) go to 460
+
          if(phaseu(i).eq.phaseu(j)) go to 460
-         if(idtu(i3).ne.(j*i + j+i)) go to 460
+
+         if(idtu(i3).ne.(j*i + j+i)) then
+            if(idtu(i3+1).eq.(j*i + j+i)) then
+               i3 = i3 + 1
+            else
+              go to 460
+            endif
+         endif
 
          i2    = i2 + 1
          i3    = i3 + 1
@@ -9431,10 +9760,10 @@ c
  
          art = trim(phaseu(j))//' - '//trim(phaseu(i))
 
-          if(typctl.gt.5) then
-             print *,i,j,sta(iev(j)),del(iev(i)),
-     +               trim(art),dtobs,dtres,tttr(j),tt(j),tttr(i),tt(i)
-          endif
+         if(typctl.gt.5) then
+            print *,i,j,sta(iev(j)),del(iev(i)),
+     +              trim(art),dtobs,dtres,tttr(j),tt(j),tttr(i),tt(i)
+         endif
 
          if(output) then
             statw = sta(iev(i))
@@ -9469,6 +9798,7 @@ c
 
 461   continue
 
+      if(ndmisf.eq.0) go to 466
       sdmean  = sdmean / dble(ndmisf)
       sdrmean = sdrmean / dble(ndmisf)
       rmsdt   = dsqrt(rmsdt  / dble(ndmisf))
@@ -9736,8 +10066,8 @@ c
       if(json_out) then
          call json_add_double("time", tome, json_rc)
          call json_add_double("dt0", var2(1), json_rc)
-         call json_add_double("lat", elatmg, json_rc)
-         call json_add_double("dlat", sdlatg, json_rc)
+         call json_add_double("lat", elatm, json_rc)
+         call json_add_double("dlat", sdlat, json_rc)
          call json_add_double("lon", elonm, json_rc)
          call json_add_double("dlon", var2(3), json_rc)
          call json_add_double("z", zo, json_rc)
@@ -9748,16 +10078,16 @@ c
         if(output) then
            write(11,'(i4,''-'',i2.2,''-'',i2.2,3i3.2,''.'',i3.3,
      +        2f9.3,f8.2,f7.2,2f9.4,f8.2,f9.3,f7.2,i5,f9.3)') 
-     +        yy,mon,dd,hh,mi,isec,msec,elatmg,elonm,zo,vpvsm,
-     +        sdlatg,var2(3),var2(4),var2(1),sdvpvs,in,rms
+     +        yy,mon,dd,hh,mi,isec,msec,elatm,elonm,zo,vpvsm,
+     +        sdlat,var2(3),var2(4),var2(1),sdvpvs,in,rms
 
         endif
 
         if(typctl.ge.0) then
            write(*,'(i4,''-'',i2.2,''-'',i2.2,3i3.2,''.'',i3.3,2f9.3,
      +           f8.2,f7.2,2f9.4,f8.2,f9.3,f7.2,i5,f9.3)') 
-     +           yy,mon,dd,hh,mi,isec,msec,elatmg,elonm,zo,vpvsm,
-     +           sdlatg,var2(3),var2(4),var2(1),sdvpvs,in,rms
+     +           yy,mon,dd,hh,mi,isec,msec,elatm,elonm,zo,vpvsm,
+     +           sdlat,var2(3),var2(4),var2(1),sdvpvs,in,rms
         endif
         
         if(json_out) call json_add_double("dz", var2(4), json_rc)
@@ -9773,15 +10103,15 @@ c
         if(output) then
            write(11,'(i4,''-'',i2.2,''-'',i2.2,3i3.2,''.'',i3.3,
      +           2f9.3,f8.2,f7.2,2f9.4,a8,f9.3,f7.2,i5,f9.3)') 
-     +           yy,mon,dd,hh,mi,isec,msec,elatmg,elonm,zo,vpvsm,
-     +           sdlatg,var2(3),cfix,var2(1),sdvpvs,in,rms
+     +           yy,mon,dd,hh,mi,isec,msec,elatm,elonm,zo,vpvsm,
+     +           sdlat,var2(3),cfix,var2(1),sdvpvs,in,rms
         endif
 
         if(typctl.ge.0) then
            write(*,'(i4,''-'',i2.2,''-'',i2.2,3i3.2,''.'',i3.3,
      +        2f9.3,f8.2,f7.2,2f9.4,a8,f9.3,f7.2,i5,f9.3)') 
-     +        yy,mon,dd,hh,mi,isec,msec,elatmg,elonm,zo,vpvsm,
-     +        sdlatg,var2(3),cfix,var2(1),sdvpvs,in,rms
+     +        yy,mon,dd,hh,mi,isec,msec,elatm,elonm,zo,vpvsm,
+     +        sdlat,var2(3),cfix,var2(1),sdvpvs,in,rms
         endif
 
         if(json_out) call json_add_string("dz", cfix, json_rc)
@@ -9802,7 +10132,7 @@ c
 
       if(ref_eve .and. output) then
 
-         call depi(dlati,dloni,elatmg,elonm,del3,dk,ep2,ep1,d2km)
+         call depi(dlati,dloni,elatm,elonm,del3,dk,ep2,ep1,d2km)
 
       
          if(isf_ref.ne.' ' .and. isf_in) then
@@ -9829,14 +10159,14 @@ c
      +              ''delta ='',f6.2,'' deg):'',/,''    DEPTH   '',
      +              ''    VP        VS    DISCON'')') rmax0
            else
-             radkm = rmax0*deg2rad*radloc(elatmg,1)
+             radkm = rmax0*deg2rad*radloc(elatm,1)
              write(11,'(/,''CRUST 1.0 model for source-region (max. '',
      +              ''delta ='',f8.1,'' km):'',/,''    DEPTH   '',
      +              ''    VP        VS    DISCON'')') radkm
            endif
         
            itrue = 0
-           elatc = elatmg
+           elatc = elatm
            elonc = elonm
            inum  = 2
            ierr = 0
@@ -9853,7 +10183,7 @@ c
      +              ''        VS'',''    DISCON'')') 
      +              trim(filloc),rmax0
            else
-              radkm = rmax0*deg2rad*radloc(elatmg,1)
+              radkm = rmax0*deg2rad*radloc(elatm,1)
               write(11,'(/,''Local model '',a,'' used (max. delta ='',
      +              f8.1,'' km):'',/,''    DEPTH       VP'',
      +              ''        VS'',''    DISCON'')') 
@@ -9886,7 +10216,7 @@ c
 
 c     print *,'czo ',czo,' iterz ',iterz,' zoflag ',zoflag, idepm,zo
 
-      if(czo.eq.'B' .and. ((.not. zoflag) .or. iterz.lt.2) .and.
+      if(czo.eq.'B' .and. (.not.zoflag .or. iterz.lt.1) .and.
      +   idepm.eq.0) then
 
          zoflag=.true.
@@ -9895,19 +10225,17 @@ c     print *,'czo ',czo,' iterz ',iterz,' zoflag ',zoflag, idepm,zo
          miteras = miteras + iter
 
          if(zo.le.depthmin .or. zo.ge.depthmax) then
-            call def_depth(defdep,elatmg,elonm,idetyp,ldefd,c1typ,
+            call def_depth(defdep,elatm,elonm,idetyp,ldefd,c1typ,
      +                     ideptyp)
             call zo2to(defdep-zo,tome,var(1))
             zo   = defdep
             tom  = tome - timemin
          endif
 
-         sdzo  = sdzo1
+         sdzo  = sdzo0
 
          sdto  = dpythag(var2(1),25.d0)
-         sdlat = sdlatg*5.d0
-         sdlon = var2(3)*5.d0
-         sdlat = sdlat0
+         sdlatg = sdlat0g
          sdlon = sdlon0
 
          disper  = 0.001d0
@@ -9951,7 +10279,8 @@ c     print *,'czo ',czo,' iterz ',iterz,' zoflag ',zoflag, idepm,zo
 
       if(output) close(11)
 
+99999 continue
       stop
 
-c     end program HYPOSAT_6_1
+c     end program HYPOSAT_6_3
       end 

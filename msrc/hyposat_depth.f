@@ -4,10 +4,9 @@ c
 c     read the ISC file with default depths at locations given by
 c     lat & lon and the long record of lacated events at ISC.
 c
-c     If no default dept vaue is available, the Moho depth from 
+c     If no default dept value is available, the Moho depth from 
 c     Crust 1.0 is used as default.
 c
-c     input:
 c     input:
 c
 c              dlat - event latitude
@@ -19,7 +18,7 @@ c              idetyp - type of default depth
 c                       = 1 from ISC file
 c                       = 2 from Crust 1.0 Moho depth
 c                       = 3 from default depth in FE Region for AK135
-c                       = 4 no value found. defdep set to 0.
+c                       = 4 no value found. defdep set to 0.0
 c
 c     data are read from file 'isc_def_depths.dat' (modified from 
 c     'default.depth0.5.grid'), grn_default_depth.ak135.dat and the 

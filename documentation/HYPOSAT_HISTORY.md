@@ -493,7 +493,7 @@ e-mail: johannes.schweitzer@norsar.no
 
 ### Version 6.2 June 2025 First GitHub version
 
-	Distribution with newly structured and extended Manual.
+	Distribution with newly structured and extended Manual (Schweitzer, 2025).
 
 ### Version 6.2a August 2025 
 
@@ -508,3 +508,22 @@ e-mail: johannes.schweitzer@norsar.no
 ### Version 6.2b December 2025 
 
 	Amplitude phase names Amb, AMs & AML implemented.
+
+### Version 6.2b2 May 2026 
+
+	Small correction fo IS and T phase onsets.
+
+### Version 6.3 June 2026
+
+	Distance circles for initial epicenter calculation.
+	Restructering the procedure to define an initial epicenter.
+	Several inconsitencies removed when checking with different location scenarios.
+	Bug in handling travel-time differences removed.
+	Small correction of initial source time and its uncertainty from Wadati approach.
+	Function F2 renamed to FCHECK.
+	Command line flag '-v' included.
+	Renaming of some variables.
+	Streamlining some code.
+	Several corrections/addition to comments in the code.
+	New Manual (Schweitzer, 2026).
+	Checked with EURARC Bulletin (Schweitzer et al., 2022, doii: 10.31905/TYLLQY8T).

@@ -19,14 +19,18 @@ c
 c                               February 2023
 c                               Surface waves added
 c
+c                               19 May 2026
+c                               T, IS and x phases added
+c
       character phid0*8, phase_type*1, phid*8
       integer icph
 
       phid = phid0
       phase_type=' '
 
-      icph = len_trim(phid)
+      if(index(phid,'x').gt.0 .or. index(phid,'X').gt.0) go to 11
 
+      icph = len_trim(phid)
       if(icph.le.1) go to 10
 
       if(ichar(phid(icph:icph)).gt.48 .and.
@@ -97,6 +101,10 @@ c
       if(phid(1:3).eq.'LR ')     phase_type='L'
       if(phid(1:3).eq.'LQ ')     phase_type='L'
       if(phid(1:3).eq.'L  ')     phase_type='L'
+      if(phid(1:3).eq.'IS ')     phase_type='L'
+      if(phid(1:2).eq.'T ')      phase_type='L'
+
+11    continue
 
       return
       end
@@ -253,7 +261,7 @@ c
             endif
             imin = 2
             goto 100
-         else  if(dt.gt.0.d0) then
+         else  
             if(dis.lt.150.d0) then
                phid = 'Sn'
             else
@@ -598,7 +606,7 @@ c
          goto 100
       endif
       if(phid.eq.'Sb') then
-         phid='Sg'
+         phid='Lg'
          goto 100
       endif
 

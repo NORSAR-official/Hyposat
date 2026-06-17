@@ -11,18 +11,17 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOMOD_2_2b
+      program HYPOMOD_2_3
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
       character  version*25, VDATE*20
-      parameter (version='HYPOMOD Version 2.2b    ')
-c     parameter (vdate=' ( 08 December 2025)' )
-      parameter (vdate=' ' )
+      parameter (version='HYPOMOD Version 2.3     ')
+      parameter (vdate=' ( 17 June 2026)' )
 
 c
-c     last changes:  08 December 2025
+c     last changes:  17 June 2026
 c
 c----------------------------------------------------------------------
 c
@@ -37,7 +36,7 @@ c     All input and output files are identical to hyposat.
 c     See HYPOSAT manual for details. However some features are just
 c     ignored because we do not invert any data!
 c
-c     HYPOMOD 2.1a is based on HYPOSAT 6.1f
+c     HYPOMOD 3 is based on HYPOSAT 6.3
 c
 c--------------------------------------------------------------------
 c
@@ -54,7 +53,7 @@ c                dlsq ellcal, ellip, elpcor, epmagc, fetoh2, fhtoe,
 c                findrange, get_mod_c10, get_mod_global, 
 c                get_mod_reg, get_station, hyposat_cross, hyposat_geo, 
 c                hyposat_gmi, indexx, magfact, mult_ons, 
-c                plane, tauget_mod, tauget_ray, testphase, ttloc, zo2to
+c                tauget_mod, tauget_ray, testphase, ttloc, zo2to
 c
 c     functions: alpha1, alpha2, convlat, phase_type, phasw,
 c                dirdel, q2, radloc, rdig,
@@ -111,7 +110,7 @@ c
      +          string*550,touse(mread)*9,touse0*9,phidr*8,
      +          o_string*550,textout*160,text(mread)*160,
      +          arid(mread)*8,statcorstr*80, texth*160,phid0*8,
-     +          usedm*6,phsearch*1,
+     +          usedm*6,phsearch*1, phase_tu*1,
      +          useds*6, usedr*1, usedsr*1, stringt*30, onflag(mread)*3
 
       dimension azi(mread),tt(mread),p(mread),
@@ -132,7 +131,7 @@ c
 
       character art*16, mtyp0*3
 
-      real*4 rzo,rdel,razi,rzo1,rdel1,rmcorr, rdelk
+      real*4 rzo,rdel,razi,rzo1,rdel1, rdelk
 
       logical first
       real*4  zso
@@ -181,7 +180,7 @@ c
 c     other variables
 c
       integer   yy,mon,dd,hh,idoy,ierr,typctl,mi,idum, isreg, regnum,
-     +          y00, mon00, d00, h00, ierc
+     +          y00, mon00, d00, h00
 
       character mm*4,name*48
       real*8    lat,lon,dlati,dloni,ddepi, elevs, cpq, cpq2
@@ -205,6 +204,19 @@ c
      +          old_syntax, emerout, larid, 
      +          primef, 
      +          eflag , lmaxm
+
+      character arg*2
+      icom = command_argument_count()
+
+      if(icom.gt.0) then
+         call getarg(1,arg)
+         if(arg.eq.'-v') then
+           print*,trim(version), trim(vdate)
+           go to 99999
+         endif
+         print *,' WRONG argument for HYPOMOD'
+         go to 99999
+      endif
 
 c
 c     some constants and initial or default values
@@ -292,6 +304,8 @@ c
       epilat0 = -999.d0
       epilon0 = -999.d0
       tome0   = -2840140801.d0
+
+      ttdmin = 2.0d0
 
       iwl = 0
 
@@ -613,7 +627,7 @@ c
 
       if(string(1:12).eq.'OUTPUT LEVEL') then
           read (string(icolon2:),*) typctl
-          if(typctl.lt.-1)   typctl = 0
+          if(typctl.lt.-1)   typctl = -1
           if(typctl.ge.40)  typctl = 4
           if(typctl.gt.10) then
              itypn = mod(typctl,10)
@@ -644,6 +658,11 @@ c
           diffflag = .true.
           read (string(icolon2:),*) intinp
           if(intinp.ne.1) diffflag = .false.
+          go to 1
+      endif
+
+      if(string(1:34).eq.'MIN ALLOWED TRAVEL-TIME DIFFERENCE') then
+          read (string(icolon2:),*) ttdmin
           go to 1
       endif
 
@@ -1099,7 +1118,7 @@ c
 
       if(output) then
          open (unit=11,file=outputfile)
-         write (11,'(a,/)') trim(title)
+         write (11,'(a,/)') trim(version)
          write (11,'(''Event solution by input from '',a,/)') 
      +          trim(author)
       endif
@@ -1197,7 +1216,10 @@ c
 
       else
          if(output) write (11,'(a,/)') trim(title)
-         print *,'EVENT ',trim(title)
+         if(typctl.ge.0) then
+            print *,'EVENT ',trim(title)
+            print *,' '
+         endif
       endif
 
       timemin = 9999999999.d0
@@ -1651,7 +1673,7 @@ c     print*, timeo,jdate,yy,mon,mm,dd,idoy,hh,mi,sec
             chgcas = uppcas(phidd(3:3))
             if(chgcas.eq.'L') phase(ii) = 'AML'
             if(chgcas.eq.'S') phase(ii) = 'AMs'
-            if(chgcas.eq.'B') phase(ii)(1:2) = 'Amb'
+            if(chgcas.eq.'B') phase(ii) = 'Amb'
             go to 63
          endif
       endif
@@ -2258,6 +2280,8 @@ c     print *,'---> (e-0) ', i,phase(i),phid,phaseu(i),useds,surf,icha
       first2 = .false.
       j = 0
 
+      phase_tu = phase_type(phaseu(i))
+
       do 420 j1 = 1,nphass
 
       j = j + 1
@@ -2269,7 +2293,10 @@ c
       phid1 = phcd(j)
 
       phase_t = phase_type(phid1)
+
       if(phsearch.ne.' ' .and. phsearch.ne.phase_t) go to 420
+
+      if(phase_t.ne.phase_tu .and. phase_tu.ne.' ') go to 420
 
       dpa   = 0.d0
       dpaa  = 0.d0
@@ -3318,14 +3345,27 @@ c
          if(used(j)(4:4).ne.'D') go to 460
 
          if(iev(i).ne.iev(j)) go to 460
+
          if(phaseu(i).eq.phaseu(j)) go to 460
+
+         if(dabs(tt(i)-tt(j)).le.1.d-3) go to 460
+
+         if(dabs(tttr(i)-tttr(j)).lt.ttdmin .and.
+     +      phase_type(phaseu(i)).eq.phase_type(phaseu(j)))  go to 460
+
+         if(((tt(j).gt.tt(i)) .and. (tttr(j).lt.tttr(i))) .or.
+     +       ((tt(i).gt.tt(j)) .and. (tttr(i).lt.tttr(j))) ) go to 460
 
          i2    = i2 + 1
          arr(i2) = sngl(del(iev(i)))
 
          dtth  = tttr(j) - tttr(i)
          dtobs = tt(j) - tt(i)
-         dtres = dtobs - dtth
+         if(dtth.lt.0.d0) then
+            dtres = dtth - dtobs
+         else
+            dtres = dtobs - dtth
+         endif
 
          sdmean  = sdmean  + dtres
          sdrmean = sdrmean + dabs(dtres)
@@ -3373,6 +3413,7 @@ c
 
 461   continue
 
+      if(ndmisf.eq.0) go to 466
       sdmean  = sdmean / dble(ndmisf)
       sdrmean = sdrmean / dble(ndmisf)
       rmsdt   = dsqrt(rmsdt  / dble(ndmisf))
@@ -3559,6 +3600,7 @@ c
 
       if(output) close(11)
 
+99999 continue
       stop
 
 c     end program HYPOMOD_2.1

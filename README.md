@@ -2,7 +2,7 @@
 
 HYPOSAT/ HYPOMOD are file-in file-out utilities for localization of seismic events that have been around for many decades.
 It has previously been shared to those interested via mail or ftp.
-From version 6.2, it is available in GitHub
+From version 6.2 on, it is available in GitHub
 
 The program package consists mainly of Fortran code, and is put together by Johannes Schweitzer at NORSAR since 1997 and before at the Ruhr-Univerity Bochum, Germany. 
 
@@ -21,7 +21,7 @@ Schweitzer, J. (2018). User manual for HYPOSAT 6 and HYPOMOD 2. NMSOP-3, PD 11.1
 
 Schweitzer, J. (2025). Travel-time corrections for seismic event locations. J. Geol. Soc. India (J-GSI), 101, 754-758. doi: 10.17491/jgsi/2025/0120040017.
 
-Schweitzer, J. (2025). HYPOSAT 6.2 and HYPOMOD 2.2 - The User Manual. 60 pp., NORSAR, doi: 10.21348/p.2025.0001.
+Schweitzer, J. (2026). HYPOSAT 6.3 and HYPOMOD 2.2 - The User Manual. 60 pp., NORSAR, doi: 10.21348/p.2026.0001.
 
 
 ## Inherited source codes
@@ -93,3 +93,9 @@ cmake --build . --target install
 
 cmake --build . --target package
 
+### Program version
+
+When executing hyposat or hypomod with the command line extension '-v' the programs just write version number and build date to standard out and stopping each further execution.
+
+hyposat -v
+hypomod -v

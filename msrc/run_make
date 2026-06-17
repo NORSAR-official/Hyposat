@@ -11,6 +11,8 @@
 #  tested for Linux g77      compiler                        #
 #  tested for Linux gfortran compiler                        #
 #                                                            #
+#  last changes June 2026                                     #
+#                                                            #
 ##############################################################
 #
 #  The script can have 3 different calls
@@ -25,6 +27,7 @@ then
     echo "run_make hyposat"
     echo "run_make hypomod"
     echo "run_make clean"
+    echo "run_make all"
     exit
 fi
 
@@ -66,12 +69,12 @@ fi
 
 #
 ## 	for debugging
-#
-
 #	export DEBUG="-g3 -Wall -frange-check"
+
 	export DEBUG=""
 
 #	export LFLAG="-lgfortran -lm"
+#       to strip code from source inforamtion
 	export LFLAG="-lgfortran -lm -s"
 
 #
@@ -131,6 +134,19 @@ echo "C-compiler       CC $CC"
 echo "Fortran-compiler F77 $F77"
 echo
      make hypomod
+     exit
+fi
+
+if [ $1 == 'all' ] 
+then
+echo
+echo "make install with :"
+echo "C-compiler       CC $CC"
+echo "Fortran-compiler F77 $F77"
+echo
+     make hyposat
+     make hypomod
+     make clean
      exit
 fi
 

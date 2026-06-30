@@ -1,6 +1,6 @@
 * hyposat-parameter.tele.mod
 
-AUTHOR OF SOLUTION                 : HYPOSAT 6.3
+AUTHOR OF SOLUTION                 : HYPOSAT6.3
 GLOBAL MODEL                       : ak135_A
 GLOBAL MODEL 2                     : iasp91_A
 GLOBAL MODEL 3                     : _

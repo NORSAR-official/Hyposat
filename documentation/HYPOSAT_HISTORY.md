@@ -521,6 +521,7 @@ e-mail: johannes.schweitzer@norsar.no
 	Bug in handling travel-time differences removed.
 	Small correction of initial source time and its uncertainty from Wadati approach.
 	Function F2 renamed to FCHECK.
+	Phase identification changed.
 	Command line flag '-v' included.
 	Renaming of some variables.
 	Streamlining some code.

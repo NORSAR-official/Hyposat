@@ -18,10 +18,10 @@ c
 
       character  version*25, VDATE*20
       parameter (version='HYPOMOD Version 2.3     ')
-      parameter (vdate=' ( 17 June 2026)' )
+      parameter (vdate=' ( 30 June 2026)' )
 
 c
-c     last changes:  17 June 2026
+c     last changes:  30 June 2026
 c
 c----------------------------------------------------------------------
 c
@@ -202,7 +202,7 @@ c
      +          sloflag, isf_epi, 
      +          firstph, first2, ldepth0,
      +          old_syntax, emerout, larid, 
-     +          primef, 
+     +          primef, fmoho,
      +          eflag , lmaxm
 
       character arg*2
@@ -308,6 +308,9 @@ c
       ttdmin = 2.0d0
 
       iwl = 0
+
+      sglgdis0 = 50.d0
+      sglgdis = -999.d0
 
       string   = ' '
       o_string = ' '
@@ -827,6 +830,14 @@ c
           intinp = 0
           read (string(icolon2:),*) intinp
           if(intinp.gt.0 .and. intinp.lt.6) iwl = intinp
+          go to 1
+      endif
+
+      if(string(1:15).eq.'SG--LG DISTANCE') then
+          abc = -999.d0
+          read (string(icolon2:),*) abc
+          if(abc.gt.0.d0) sglgdis = abc
+          if(sglgdis0.lt.sglgdis) sglgdis0 = sglgdis
           go to 1
       endif
 
@@ -1850,7 +1861,7 @@ c       print *,vlflag,vp,vs
       if(pin.le.0.d0) pin = -999.d0
 
       if(islow.eq.0 .and. pin.gt.0.0d0) then
-         p(ii)  = radloc(stala(iev(ii)),1)*deg2rad/pin
+         p(ii)  = radloc(stala(j),1)*deg2rad/pin
       else
          p(ii) = pin
          if(pin.gt.0.d0) then
@@ -1863,11 +1874,11 @@ c       print *,vlflag,vp,vs
       phase_t = chgcas(1:1)
 
       if(phase_t.eq.'P')  then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.2) 
-     +       istaph(iev(ii))=istaph(iev(ii)) + 1
+         if(istaph(j).eq.0 .or. istaph(j).eq.2) 
+     +       istaph(iev)=istaph(j) + 1
       else if(phase_t.eq.'S') then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.1)
-     +       istaph(iev(ii))=istaph(iev(ii)) + 2
+         if(istaph(j).eq.0 .or. istaph(j).eq.1)
+     +       istaph(j)=istaph(j) + 2
       endif
 
       if(phase(ii)(1:1).eq. 'P' .and. phase(ii)(3:3).eq. ' ')
@@ -2075,8 +2086,9 @@ c
      +        d2km)
          rzo   = sngl(zo)
          delta = del(iev(i))
+         dk    = delk(iev(i))
          rdel  = sngl(delta)
-         rdelk = sngl(delk(iev(i)))
+         rdelk = sngl(dk)
 
          fla1 = deg2rad*(90.d0-elatm)
          razi = sngl(azie(iev(i)))
@@ -2101,10 +2113,14 @@ c
          loctt = 0
          nphas = 0
 
+         fmoho = .false.
+
          if(imod2.eq.0 .or. delta.gt.rmax0 .or. zo.gt.zmax) then
 
            call tauget_mod(rzo,rdel,nphas,phcd,ttc,dtdd,
      +                         dtdh,dddp,modn)
+
+           if(zo.ge.zmoho(modind)) fmoho = .true.
 
          else
 
@@ -2124,12 +2140,13 @@ c
            loctt = 1
            loctts = loctts + 1
 
+           if(zo.ge.dmoho) fmoho = .true.
+
          endif
 
-         if(delk(iev(i)).gt.30.d0 .and. zo.lt.35.d0 .and.
-     +      delk(iev(i)).gt.3.d0*zo ) then
+         if(.not.fmoho .and. dk.ge.sglgdis0) then
             nphas       = nphas + 1
-            ttc(nphas)  = delk(iev(i))/vlg
+            ttc(nphas)  = dk/vlg
             dtdd(nphas) = d2km/vlg
             dtdd(nphas) = d2km/vlg
             dtdh(nphas) = 0.d0
@@ -2227,16 +2244,27 @@ c
 
       surf = .false.
  
-      if(phid.eq.'Rg') then
-         surf = .true.
-         vsurf = vrg
+      if(sglgdis.gt.0.d0) then
+
+         if(phid.eq.'Sg' .and. dk.ge.sglgdis .and. sglgdis.gt.0.d0) then
+            dttlg = ttobs - tome - dk/vlg
+            if(dttlg.gt.-15.d0) phid = 'Lg'
+         endif
+
+         if(phid.eq.'Lg' .and. dk.lt.sglgdis0) phid = 'Sg'
+
       endif
-                
+
       if(phid.eq.'Lg' ) then
          surf = .true.
          vsurf = vlg
       endif
  
+      if(phid.eq.'Rg') then
+         surf = .true.
+         vsurf = vrg
+      endif
+                
       if(phid.eq.'LR') then
          surf = .true.
          vsurf = vlr
@@ -2259,7 +2287,7 @@ c
 
       if(surf .and. phid.ne.'Lg') then
          nphas       = nphas + 1
-         ttc(nphas)  = delk(iev(i))/vsurf
+         ttc(nphas)  = dk/vsurf
          dtdd(nphas) = d2km/vsurf
          dtdh(nphas) = 0.d0
          phcd(nphas) = phid
@@ -3326,11 +3354,6 @@ c
      
       if(.not.diffflag) go to 466
 
-      if(output) then
-        write(11,'(/''Defining travel-time differences:''/)')
-        write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
-      endif
-
       i2 = 0
       sdmean  = 0.d0
       sdrmean = 0.d0
@@ -3419,6 +3442,21 @@ c
       rmsdt   = dsqrt(rmsdt  / dble(ndmisf))
 
       if(output) then
+
+         if(i2.lt.10) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i2,'' ):''/)') i2
+         else if(i2.gt.10 .and. i2.lt.100) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i3,'' ):''/)') i2
+         else if(i2.gt.100 .and. i2.lt.1000) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i4,'' ):''/)') i2
+         else
+            write(11,'(/''Defining travel-time differences ('',
+     +            i5,'' ):''/)') i2
+         endif
+         write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
 
          call indexx(i2,arr,indx)
 

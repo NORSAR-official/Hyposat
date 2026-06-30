@@ -55,7 +55,7 @@ APA0    4.410  78.66 Lg               12 02 20.100  -3.938 249.40  -19.73 27.10 
 FINES   6.032 159.31 Pn               12 01 39.200   1.224 344.60    1.30 15.00   1.25 TAS                                        _  45.80         
 NORES   7.805 219.40 Pn               12 01 57.800  -3.261  28.60   -1.72 13.40  -0.36 TAS                                        _  45.78         
 
-Defining travel-time differences:
+Defining travel-time differences ( 4 ):
 
  Stat  Delta  Phases           Observed   Res
 

@@ -28,7 +28,9 @@ c     Johannes Schweitzer, NORSAR August 2020
 c
 c     changes: 11 July 2022 after changing the reading to direct
 c              accessing the correct record.
-c           
+c
+c              June 2026: irec for ISC default depth reading changed to 
+c                         rounded integer
 c
 c     calls: get_moho_depth, hyposat_geo
 c
@@ -43,7 +45,7 @@ c
       character c1t*2
 
       integer idetypo
-      real*8  dlato, dlono, elev, dwa
+      real*8  dlato, dlono, elev, dwa, del, dk, az, baz, d2km
       character*512 file, file_check
       character line*58, name*80
       logical ldefd(3)
@@ -63,11 +65,14 @@ c
          idetypo = 4
       endif
 
-      if(dabs(dlat-dlato).le.1.d-1) then
-        if(dabs(dlon-dlono).le.1.d-1) then
+      if(dabs(dlat-dlato).lt.1.d-1) then
+        if(dabs(dlon-dlono).lt.1.d-1) then
           go to 899
         endif
       endif
+
+      call depi(dlat,dlon,dlato,dlono,del,dk,az,baz,d2km)
+      if(del.le.0.1d0) go to 899
 
       if(ityp.lt.3) then
 
@@ -75,8 +80,8 @@ c
 c     ideptyp = ISC database
 c
 
-         irec = idint(180.d0 - dlat*2.d0)*721 + 
-     +          idint(360.d0 + alpha1(dlon)*2.d0) + 1
+         irec = idnint(180.d0 - dlat*2.d0)*721 + 
+     +          idnint(360.d0 + alpha1(dlon)*2.d0) + 1
 
          if(irec.eq.ireco)  go to 90
 

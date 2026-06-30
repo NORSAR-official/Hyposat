@@ -34,6 +34,7 @@ SET( hyposat_SRCS
     isf_out.f
     libtau_h.f
 
+    hyposat_circles.f
     hyposat_cross.f
     hyposat_time.f
     hyposat_inv.f

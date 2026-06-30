@@ -16,13 +16,12 @@ c
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
-      character  version*25, VDATE*20, cprog*50, vdate2*20
+      character  version*25, VDATE*20, cprog*50
       parameter (version='HYPOSAT Version 6.3     ' )
-      parameter ( vdate=' ( 17 June 2026)' )
-      parameter (vdate2='  ( 17 June 2026)' )
+      parameter ( vdate=' ( 30 June 2026)' )
 
 c
-c     last changes: 16 June 2026
+c     last changes: 30 June 2026
 c
 c----------------------------------------------------------------------
 c
@@ -561,7 +560,7 @@ c
       stome0   = 120.d0
       wadmin   = 0.d0
       wadmax   = 300.d0
-      dismaxst = 180.d0
+      dismaxst = 200.0d0
       disminst = -1.d0
 
       ttdmin = 2.0d0
@@ -582,6 +581,7 @@ c
       resmaxp = 30.d0
       resmaxs = 30.d0
 
+      sglgdis0 = 50.d0
       sglgdis = -999.d0
 
       smpu = -9.d0
@@ -1832,6 +1832,7 @@ c
           abc = -999.d0
           read (string(icolon2:),*) abc
           if(abc.gt.0.d0) sglgdis = abc
+          if(sglgdis0.lt.sglgdis) sglgdis0 = sglgdis
           go to 1
       endif
       
@@ -3092,7 +3093,7 @@ c       print *,vlflag,vp,vs
 
 11    if(timeo.lt.timemin) then
          timemin = timeo
-         istatmin = iev(ii)
+         istatmin = j
       endif
 
       if(azi(ii).lt.0.d0) then
@@ -3118,7 +3119,7 @@ c
       if(pin.le.0.d0) pin = -999.d0
 
       if(islow.eq.0 .and. pin.gt.0.0d0) then
-         p(ii)  = radloc(stala(iev(ii)),1)*deg2rad/pin
+         p(ii)  = radloc(stala(j),1)*deg2rad/pin
          ps(ii) = ps(ii)*p(ii)/pin
       else
          p(ii) = pin
@@ -3134,11 +3135,11 @@ c
       phase_t = chgcas(1:1)
 
       if(phase_t.eq.'P')  then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.2) 
-     +       istaph(iev(ii))=istaph(iev(ii)) + 1
+         if(istaph(j).eq.0 .or. istaph(j).eq.2) 
+     +       istaph(j)=istaph(j) + 1
       else if(phase_t.eq.'S') then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.1)
-     +       istaph(iev(ii))=istaph(iev(ii)) + 2
+         if(istaph(j).eq.0 .or. istaph(j).eq.1)
+     +       istaph(j)=istaph(j) + 2
       endif
 
       if(phase(ii)(1:1).eq. 'P' .and. phase(ii)(3:3).eq. ' ')
@@ -3351,6 +3352,9 @@ c
             if(istats.eq.0 .and. phase_type(phase(i)).eq.'S' .and.
      +         touse(i)(1:1).ne.' ') istats = i
 
+            if(istats.eq.0 .and. phase(i).eq.'Rg' .and.
+     +         touse(i)(1:1).ne.' ') istats = i
+
             if(rpars.le.0.d0 .and. istats.gt.0 .and. p(istats).gt.0.d0) 
      +         rpars = p(istats)
 
@@ -3541,29 +3545,43 @@ c
 
       if(touse(i)(1:1).ne.'T') go to 702
 
+      ions = iev(i)
+
       do 701 j = i+1,nobs
 
       if(touse(j)(1:1).ne.'T') go to 701
 
       delkm1 = 0.d0
 
-      if(iev(i).eq.iev(j)) then
+      if(ions.eq.iev(j)) then
 
-         phai = phase(i)
-         phaj = phase(j)
+        phai = phase(i)
+        phaj = phase(j)
 
-         dtwad = dabs(tt(j)-tt(i))
-         dtswad = tts(j)+tts(i)
+        if(phase_type(phai).eq.phase_type(phaj)) go to 701
 
-         if(stcorfl) then
-            st1=0.d0
-            st2=0.d0
-            if(phase_type(phase(i)).eq.'P') st1 = statp(iev(i))
-            if(phase_type(phase(i)).eq.'S') st1 = stats(iev(i))
-            if(phase_type(phase(j)).eq.'P') st2 = statp(iev(j))
-            if(phase_type(phase(j)).eq.'S') st2 = stats(iev(j))
-            dtwad = dtwad + st1 - st2
-         endif
+        dtwad = dabs(tt(j)-tt(i))
+        dtswad = dpythag(tts(j),tts(i))
+
+        if(stcorfl) then
+           st1=0.d0
+           st2=0.d0
+           if(phase_type(phai).eq.'P') then
+              st1 = statp(ions)
+           else if(phase_type(phai).eq.'S') then
+              st1 = stats(ions)
+           else if(phase_type(phai).eq.'L') then
+              st1 = statr(ions)
+           endif
+           if(phase_type(phaj).eq.'P') then
+              st2 = statp(ions)
+           else if(phase_type(phaj).eq.'S') then
+              st2 = stats(ions)
+           else if(phase_type(phaj).eq.'L') then
+              st2 = statr(ions)
+           endif
+           dtwad = dtwad + st2 - st1
+        endif
 
         iwad = 0
         wadati = .true.
@@ -3581,9 +3599,9 @@ c
              delkm1 = dtwad*10.2d0
              delkms1 = dtswad*10.2d0
           endif
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(delkms1)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(delkms1)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if(( phai.eq.'P1      ' .and. (phaj.eq.'S1      ' .or.
      +            phaj.eq.'Sg      '  .or. phaj.eq.'Sb      '  .or.
@@ -3623,9 +3641,9 @@ c
              delkm1 = dtwad*10.2d0
              delkms1 = dtswad*10.2d0
           endif
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(delkms1)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(delkms1)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if((phai.eq.'Pg      '                      .and.
      +          (phaj.eq.'Sg      '.or.phaj.eq.'Lg      ')) .or.
@@ -3635,9 +3653,9 @@ c
           if(wadati) iwad = 2
 
           delkm1 = dtwad*8.58d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*8.58d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*8.58d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if((phai.eq.'Pn      '.and.phaj.eq.'Sn      ') .or.
      +          (phaj.eq.'Pn      '.and.phai.eq.'Sn      '))then
@@ -3645,9 +3663,9 @@ c
           if(wadati) iwad = 3
 
           delkm1 = dtwad*10.2d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*10.2d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*10.2d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if((phai.eq.'Pb      '.and.phaj.eq.'Sb      ') .or.
      +          (phaj.eq.'Pb      '.and.phai.eq.'Sb      '))then
@@ -3655,41 +3673,69 @@ c
           if(wadati) iwad = 4
 
           delkm1 = dtwad*9.47d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*9.47d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*9.47d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if(phai.eq.'Pn      '                          .and.
      +      (phaj.eq.'Sg      '.or. phaj.eq.'Lg      ')) then
 
           delkm1 = dtwad*6.02d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*6.02d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*6.02d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if(phaj.eq.'Pn      '                          .and.
      +      (phai.eq.'Sg      '.or. phai.eq.'Lg      ')) then
 
           delkm1 = dtwad*6.02d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*6.02d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*6.02d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if(phai.eq.'Pb      '                          .and.
      +      (phaj.eq.'Sg      '.or. phaj.eq.'Lg      ')) then
 
           delkm1 = dtwad*7.37d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*7.37d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*7.37d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         else if(phaj.eq.'Pb      '                          .and.
      +      (phai.eq.'Sg      '.or. phai.eq.'Lg      ')) then
 
           delkm1 = dtwad*7.37d0
-          delkm(iev(i)) = delkm(iev(i)) + delkm1
-          delkms(iev(i)) = delkms(iev(i)) + q2(dtswad*7.37d0)
-          ndelkm(iev(i)) = ndelkm(iev(i)) + 1
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*7.37d0)
+          ndelkm(ions) = ndelkm(ions) + 1
+
+        else if(phai.eq.'Pg      ' .and. phaj.eq.'Rg      ') then
+
+          delkm1 = dtwad*5.41d0
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*5.41d0)
+          ndelkm(ions) = ndelkm(ions) + 1
+
+        else if(phai.eq.'Rg      ' .and. phaj.eq.'Pg      ') then
+
+          delkm1 = dtwad*5.41d0
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*5.41d0)
+          ndelkm(ions) = ndelkm(ions) + 1
+
+        else if(phai.eq.'Pb      ' .and. phaj.eq.'Rg      ') then
+
+          delkm1 = dtwad*4.93d0
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*4.93d0)
+          ndelkm(ions) = ndelkm(ions) + 1
+
+        else if(phai.eq.'Rg      ' .and. phaj.eq.'Pb      ') then
+
+          delkm1 = dtwad*4.93d0
+          delkm(ions) = delkm(ions) + delkm1
+          delkms(ions) = delkms(ions) + q2(dtswad*4.93d0)
+          ndelkm(ions) = ndelkm(ions) + 1
 
         endif
 
@@ -4549,7 +4595,7 @@ c
       if(lwdepth ) then
           water = wdepth(elatm,elonm)
           if(water.gt.zo) then
-             zo = dble(idnint(water+0.5d0))
+             zo = dble(idnint(water+0.1d0))
              if(typctl.gt.4) then
                 print *, 'water depth at source:', water,' km'
                 print *, 'depth fixed at: ',zo,' km'
@@ -4739,6 +4785,8 @@ c     nextiter.lt.0 if oszillating solutions
 
       if(touse(i)(1:4).eq.'    ') go to 300
 
+      ions = iev(i)
+
       if(sta(iev(i)).ne.stato) then
 
          call depi(stala(iev(i)),stalo(iev(i)),elatm,elonm,del(iev(i)),
@@ -4750,6 +4798,9 @@ c     nextiter.lt.0 if oszillating solutions
            print *,'STATION EPI: ',i,stato,delta,dk
          endif
 
+         if(dk .lt. 1.d-4)       dk = 1.d-4
+         if(delta .lt. 1.d-6) delta = 1.d-6
+
          if(kmout) then
             if(dk .gt. dismaxstk ) go to 300
             if(dk .lt. disminstk ) go to 300
@@ -4757,8 +4808,6 @@ c     nextiter.lt.0 if oszillating solutions
             if(delta .gt. dismaxst ) go to 300
             if(delta .lt. disminst ) go to 300
          endif
-         if(dk .lt. 1.d-4)       dk = 1.d-4
-         if(delta .lt. 1.d-6) delta = 1.d-6
 
          stato = sta(iev(i))
 
@@ -4888,11 +4937,9 @@ c              no event deeper than 799. km !
 
          endif
 
-         if(dk.gt.30.d0 .and. zo.lt.35.d0 .and. 
-     +      dk.gt.3.d0*zo ) then
+         if(.not.fmoho .and. dk.ge.sglgdis0)then
             nphas       = nphas + 1
             ttc(nphas)  = dk/vlg
-            dtdd(nphas) = d2km/vlg
             dtdd(nphas) = d2km/vlg
             dtdh(nphas) = 0.d0
             phcd(nphas) = 'Lg'
@@ -4980,15 +5027,11 @@ c         endif
      +   phid(1:1).ne.'R' .and. phid(1:1).ne.'L' .and. 
      +   phid(1:1).ne.'T' .and. phid(1:2).ne.'IS'  ) go to 299
 
-      if(sglgdis.gt.0.d0) then
-         
+      if(phid.eq.'Sg' .and. dk.ge.sglgdis .and. sglgdis.gt.0.d0) then
          dttlg = tt(i) - tom - dk/vlg
-
-         if(phid.eq.'Sg' .and. dk.ge.sglgdis .and. dttlg.gt.-15.d0) 
-     +      phid = 'Lg'
-         if(phid.eq.'Lg' .and. dk.lt.sglgdis) phid = 'Sg'
-
+         if(dttlg.gt.-15.d0) phid = 'Lg'
       endif
+      if(phid.eq.'Lg' .and. dk.lt.sglgdis0) phid = 'Sg'
 
       if(fconr .and. .not. fixinp) then
         ipg = index(phid(1:3),'Pg')
@@ -5007,8 +5050,10 @@ c         endif
         if(isg.gt.0) phid(isg:isg+1) = 'Sn'
         isb = index(phid(1:3),'Sb')
         if(isb.gt.0) phid(isb:isb+1) = 'Sn'
+        isb = index(phid(1:3),'Lg')
+        if(isb.gt.0) phid(isb:isb+1) = 'Sg'
       endif
-
+ 
       if(touse(i)(1:1).eq.'m') go to 299
 
 c
@@ -5645,6 +5690,7 @@ c          print *,'---> (5--) phid0,phid,phid2 ',i,j,j1,phid0,phid,
 c    +           phid2,delta,dk,dtt,surf,fconr,fmoho,imin
 
            if(phid.ne.phid2 .and. imin.gt.0) go to 295
+
            if(imin.lt.0) imin = -imin
            phid = phid2
            
@@ -6048,6 +6094,8 @@ c
 
          if(iev(i).ne.iev(j)) go to 301
 
+c        print *,i,j,used(i),used(j),tt(i),tt(j)
+
          if(touse(j)(4:4).ne.'D' ) go to 301
          if(used(j)(1:1).eq.' ') go to 301
 
@@ -6061,6 +6109,8 @@ c
      +       ((tt(i).gt.tt(j)) .and. (ttt(i).lt.ttt(j)))   )  go to 301
 
          dtt = (tt(j) - ttt(j)) - (tt(i) - ttt(i))
+
+c        print *,i,j,dabs(dtt),dtm0
 
          if(dabs(dtt).le.dtm0 .or. fixinp) then
 
@@ -7553,18 +7603,18 @@ c
      +         f7.2,'' %'')') confl
 
          if(kmout) then
-            if(disminst.gt.0.d0 .and. dismaxstk.ge.20100.d0) then
+            if(disminstk.gt.0.d0 .and. dismaxstk.ge.20100.d0) then
                write(11,'(/''Location for observations at distances '',
      +               ''larger than'',f8.1,'' [km]'')') disminstk
             endif
-            if(disminst.le.0.d0 .and. dismaxstk.lt.20100.d0) then
+            if(disminstk.le.0.d0 .and. dismaxstk.lt.20100.d0) then
                write(11,'(/''Location for observations at distances '',
      +               ''shorter than'',f8.1,'' [km]'')') dismaxstk
             endif
-            if(disminst.gt.0.d0 .and. dismaxstk.lt.20100.d0) then
+            if(disminstk.gt.0.d0 .and. dismaxstk.lt.20100.d0) then
                write(11,'(/''Location for observations at distances '',
      +               ''between'',f8.1,'' and'',f8.1,'' [km]'')') 
-     +               disminst,dismaxstk
+     +               disminstk,dismaxstk
             endif
          else
             if(disminst.gt.0.d0 .and. dismaxst.ge.180.d0) then
@@ -7806,8 +7856,9 @@ c    +        used(i),touse(i)
      +        d2km)
          rzo   = sngl(zo)
          delta = del(iev(i))
+         dk    = delk(iev(i))
          rdel  = sngl(delta)
-         rdelk = sngl(delk(iev(i)))
+         rdelk = sngl(dk)
 
          if(rdel.lt.rdmi) rdmi = rdel
          if(rdel.gt.rdma) rdma = rdel
@@ -7860,11 +7911,9 @@ c    +        used(i),touse(i)
 
          endif
 
-         if(delk(iev(i)).gt.30.d0 .and. zo.lt.35.d0 .and.
-     +      delk(iev(i)).gt.3.d0*zo ) then
+         if(.not.fmoho .and. dk.ge.sglgdis0) then
             nphas       = nphas + 1
-            ttc(nphas)  = delk(iev(i))/vlg
-            dtdd(nphas) = d2km/vlg
+            ttc(nphas)  = dk/vlg
             dtdd(nphas) = d2km/vlg
             dtdh(nphas) = 0.d0
             phcd(nphas) = 'Lg'
@@ -7880,8 +7929,8 @@ c    +        used(i),touse(i)
       llimdel = .false.
 
       if(kmout) then
-         if((delk(iev(i)) .gt. dismaxst+10.d0) .or.
-     +      (delk(iev(i)) .lt. disminst-10.d0) ) then
+         if((dk .gt. dismaxstk+10.d0) .or.
+     +      (dk .lt. disminstk-10.d0) ) then
             if(.not.ldist) go to 450
             llimdel = .true.
          endif
@@ -9706,11 +9755,6 @@ c        print *,i,touse(i),' , ',useds,text(i)
 c
       if(ndt.le.0) go to 466
 
-      if(output) then
-        write(11,'(/''Defining travel-time differences:''/)')
-        write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
-      endif
-
       i2 = 0
       sdmean  = 0.d0
       sdrmean = 0.d0
@@ -9721,11 +9765,13 @@ c
 
       if(used(i)(4:4).ne.'D') go to 461
 
+      ions = iev(i)
+
       do 460 j = i+1,nobs
 
          if(used(j)(4:4).ne.'D') go to 460
 
-         if(iev(i).ne.iev(j)) go to 460
+         if(ions.ne.iev(j)) go to 460
 
          if(phaseu(i).eq.phaseu(j)) go to 460
 
@@ -9739,7 +9785,7 @@ c
 
          i2    = i2 + 1
          i3    = i3 + 1
-         arr(i2) = sngl(del(iev(i)))
+         arr(i2) = sngl(del(ions))
 
          dtth  = tttr(j) - tttr(i)
          dtobs = tt(j) - tt(i)
@@ -9761,12 +9807,12 @@ c
          art = trim(phaseu(j))//' - '//trim(phaseu(i))
 
          if(typctl.gt.5) then
-            print *,i,j,sta(iev(j)),del(iev(i)),
+            print *,i,j,sta(ions),del(ions),
      +              trim(art),dtobs,dtres,tttr(j),tt(j),tttr(i),tt(i)
          endif
 
          if(output) then
-            statw = sta(iev(i))
+            statw = sta(ions)
             if(touse(i)(9:9).eq.'*' .or. touse(j)(9:9).eq.'*') then
               chgcas = lowcas(statw)
               statw = chgcas(1:5)
@@ -9778,18 +9824,18 @@ c
 
                if(kmout) then
                   write(text(i2),'(a5,f8.2,1x,a16,f9.3,f8.3)') 
-     +                  statw,delk(iev(i)),art,dtobs,dtres
+     +                  statw,delk(ions),art,dtobs,dtres
                else
                   write(text(i2),'(a5,f8.3,1x,a16,f9.3,f8.3)') 
-     +                  statw,del(iev(i)),art,dtobs,dtres
+     +                  statw,del(ions),art,dtobs,dtres
                endif
             else
                if(kmout) then
                   write(text(i2),'(a5,f8.2,1x,a16,f9.3,f8.1)') 
-     +                  statw,delk(iev(i)),art,dtobs,dtres
+     +                  statw,delk(ions),art,dtobs,dtres
                else
                   write(text(i2),'(a5,f8.3,1x,a16,f9.3,f8.1)') 
-     +                  statw,del(iev(i)),art,dtobs,dtres
+     +                  statw,del(ions),art,dtobs,dtres
                endif
             endif
          endif
@@ -9805,6 +9851,22 @@ c
 
       if(output) then
 
+         if(i2.lt.10) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i2,'' ):''/)') i2
+         else if(i2.gt.10 .and. i2.lt.100) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i3,'' ):''/)') i2
+         else if(i2.gt.100 .and. i2.lt.1000) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i4,'' ):''/)') i2
+         else
+            write(11,'(/''Defining travel-time differences ('',
+     +            i5,'' ):''/)') i2
+         endif
+
+         write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
+
          call indexx(i2,arr,indx)
 
          do 463 i=1,i2
@@ -9814,17 +9876,11 @@ c
 
 466   continue
 
-      if(output) then
-         write(11,'(/''Number of usable stations: '',i4)') nstata
-      endif
-
-      if(json_out) then
-        call json_add_int("num_usable_stations", nstata, json_rc)
-      endif
-
       miteras = miteras + iter
 
       if(output) then
+
+        write(11,'(/''Number of usable stations: '',i4)') nstata
 
         if(miteras.gt.iter) then
             write(11,'(/''Total number of iterations: '',i5)') miteras
@@ -9969,6 +10025,8 @@ c       write(11,'(/''Quality: '',e15.10/)') qp
       endif
 
       if(json_out) then
+        call json_add_int("num_usable_stations", nstata, json_rc)
+
         call json_add_double("weighted_rms_of_onset_times",
      +       rmsisc, json_rc)
         call json_start_dict_group("residuals_of_defining_data",

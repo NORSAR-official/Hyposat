@@ -18,10 +18,10 @@ c
 
       character  version*25, VDATE*20, cprog*50
       parameter (version='HYPOSAT Version 6.3     ' )
-      parameter ( vdate=' ( 30 June 2026)' )
+      parameter ( vdate=' ( 8 July 2026)' )
 
 c
-c     last changes: 30 June 2026
+c     last changes: 8 July 2026
 c
 c----------------------------------------------------------------------
 c
@@ -668,8 +668,10 @@ c
       if(string(1:1).eq.'*') go to 1
       if(string(1:1).eq.'?') go to 1
 
-      chgcas = uppcas(string(1:7))
-      if(chgcas(1:7).eq.'HYPOSAT') go to 1
+      chgcas = uppcas(string(1:21))
+      if(chgcas(1:7).eq.'HYPOSAT') then
+         if(string(1:21).ne.'HYPOSAT-IN OLD SYNTAX') go to 1
+      endif
 
       icolon = index(string,':')
 

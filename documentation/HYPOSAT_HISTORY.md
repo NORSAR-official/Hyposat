@@ -511,9 +511,9 @@ e-mail: johannes.schweitzer@norsar.no
 
 ### Version 6.2b2 May 2026 
 
-	Small correction fo IS and T phase onsets.
+	Small correction for IS- and T-phase onsets.
 
-### Version 6.3 June 2026
+### Version 6.3 July 2026
 
 	Distance circles for initial epicenter calculation.
 	Restructering the procedure to define an initial epicenter.

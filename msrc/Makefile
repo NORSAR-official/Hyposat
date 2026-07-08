@@ -4,7 +4,7 @@
 #                                                            #
 # July 2013 , Johannes Schweitzer, NORSAR                    #
 #                                                            #
-#  status: May 2026                                          #
+#  status: July 2026                                          #
 #                                                            #
 #  johannes@norsar.no                                        #
 #                                                            #
@@ -33,12 +33,14 @@ hyposat :
 hyposat : $(obj1) $(obj2) $(obj3) $(obj4) 
 	$(LD) $(LDPP) $(LFLAG) -o $(prog) $(obj1) $(obj2) $(obj3) $(obj4) 
 
+	chmod 755 $(prog)
 	mv $(prog) $(DEST)
 
 hypomod : 
 hypomod : $(objm) $(objm2) $(objm3) $(objm4)
 	$(LD) $(LFLAG) -o $(prog2) $(objm) $(objm2) $(objm3) $(objm4)
 
+	chmod 755 $(prog)
 	mv $(prog2) $(DEST)
 
 .SUFFIXES: .o

@@ -18,10 +18,10 @@ c
 
       character  version*25, VDATE*20
       parameter (version='HYPOMOD Version 2.3     ')
-      parameter (vdate=' ( 30 June 2026)' )
+      parameter (vdate=' ( 8 July 2026)' )
 
 c
-c     last changes:  30 June 2026
+c     last changes:  8 July 2026
 c
 c----------------------------------------------------------------------
 c
@@ -3171,7 +3171,7 @@ c
            imsm = 0
            dmsm = 0.d0
            sdms = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4511 im = 1,nstat
                  if(stams(im).gt.-9.9d0) then
                     imsm = imsm + 1
@@ -3193,7 +3193,7 @@ c
            imlm = 0
            dmlm = 0.d0
            sdml = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4513 im = 1,nstat
                  if(staml(im).gt.-9.9d0) then
                     imlm = imlm + 1
@@ -3215,7 +3215,7 @@ c
            imbm = 0
            dmbm = 0.d0
            sdmb = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4515 im = 1,nstat
                  if(stamb(im).gt.-9.9d0) then
                     imbm = imbm + 1
@@ -3641,5 +3641,5 @@ c
 99999 continue
       stop
 
-c     end program HYPOMOD_2.1
+c     end program HYPOMOD_2.3
       end 

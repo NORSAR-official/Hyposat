@@ -68,7 +68,7 @@
 
         Amplitude phase names Amb, AMs & AML implemented.
 
-### Version 2.3 June 2026 
+### Version 2.3 July 2026 
 
-        Some changes for compatibility with HYPOSAT_6.3.
+        Some changes for compatibility with HYPOSAT_6.3a.
 	Command line flag '-v' included.

@@ -513,7 +513,7 @@ e-mail: johannes.schweitzer@norsar.no
 
 	Small correction for IS- and T-phase onsets.
 
-### Version 6.3 July 2026
+### Version 6.3 June 2026
 
 	Distance circles for initial epicenter calculation.
 	Restructering the procedure to define an initial epicenter.
@@ -528,3 +528,7 @@ e-mail: johannes.schweitzer@norsar.no
 	Several corrections/addition to comments in the code.
 	New Manual (Schweitzer, 2026).
 	Checked with EURARC Bulletin (Schweitzer et al., 2022, doii: 10.31905/TYLLQY8T).
+
+### Version 6.3a July 2026
+
+	Small correction for compatibility with the old syntax of hyposat-in.

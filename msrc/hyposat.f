@@ -11,13 +11,13 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOSAT_6_3
+      program HYPOSAT_6_3a
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
       character  version*25, VDATE*20, cprog*50
-      parameter (version='HYPOSAT Version 6.3     ' )
+      parameter (version='HYPOSAT Version 6.3a    ' )
       parameter ( vdate=' ( 8 July 2026)' )
 
 c

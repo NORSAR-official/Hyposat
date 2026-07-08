@@ -9413,7 +9413,7 @@ c       write(12,'(a)') cdum
            imsm = 0
            dmsm = 0.d0
            sdms = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4511 im = 1,nstat
                  if(stams(im).gt.-9.9d0) then
                     imsm = imsm + 1
@@ -9435,7 +9435,7 @@ c       write(12,'(a)') cdum
            imlm = 0
            dmlm = 0.d0
            sdml = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4513 im = 1,nstat
                  if(staml(im).gt.-9.9d0) then
                     imlm = imlm + 1
@@ -9457,7 +9457,7 @@ c       write(12,'(a)') cdum
            imbm = 0
            dmbm = 0.d0
            sdmb = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4515 im = 1,nstat
                  if(stamb(im).gt.-9.9d0) then
                     imbm = imbm + 1

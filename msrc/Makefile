@@ -40,7 +40,7 @@ hypomod :
 hypomod : $(objm) $(objm2) $(objm3) $(objm4)
 	$(LD) $(LFLAG) -o $(prog2) $(objm) $(objm2) $(objm3) $(objm4)
 
-	chmod 755 $(prog)
+	chmod 755 $(prog2)
 	mv $(prog2) $(DEST)
 
 .SUFFIXES: .o

@@ -4,10 +4,9 @@ c
 c     read the ISC file with default depths at locations given by
 c     lat & lon and the long record of lacated events at ISC.
 c
-c     If no default dept vaue is available, the Moho depth from 
+c     If no default dept value is available, the Moho depth from 
 c     Crust 1.0 is used as default.
 c
-c     input:
 c     input:
 c
 c              dlat - event latitude
@@ -19,7 +18,7 @@ c              idetyp - type of default depth
 c                       = 1 from ISC file
 c                       = 2 from Crust 1.0 Moho depth
 c                       = 3 from default depth in FE Region for AK135
-c                       = 4 no value found. defdep set to 0.
+c                       = 4 no value found. defdep set to 0.0
 c
 c     data are read from file 'isc_def_depths.dat' (modified from 
 c     'default.depth0.5.grid'), grn_default_depth.ak135.dat and the 
@@ -29,7 +28,9 @@ c     Johannes Schweitzer, NORSAR August 2020
 c
 c     changes: 11 July 2022 after changing the reading to direct
 c              accessing the correct record.
-c           
+c
+c              June 2026: irec for ISC default depth reading changed to 
+c                         rounded integer
 c
 c     calls: get_moho_depth, hyposat_geo
 c
@@ -44,7 +45,7 @@ c
       character c1t*2
 
       integer idetypo
-      real*8  dlato, dlono, elev, dwa
+      real*8  dlato, dlono, elev, dwa, del, dk, az, baz, d2km
       character*512 file, file_check
       character line*58, name*80
       logical ldefd(3)
@@ -64,11 +65,14 @@ c
          idetypo = 4
       endif
 
-      if(dabs(dlat-dlato).le.1.d-1) then
-        if(dabs(dlon-dlono).le.1.d-1) then
+      if(dabs(dlat-dlato).lt.1.d-1) then
+        if(dabs(dlon-dlono).lt.1.d-1) then
           go to 899
         endif
       endif
+
+      call depi(dlat,dlon,dlato,dlono,del,dk,az,baz,d2km)
+      if(del.le.0.1d0) go to 899
 
       if(ityp.lt.3) then
 
@@ -76,8 +80,8 @@ c
 c     ideptyp = ISC database
 c
 
-         irec = idint(180.d0 - dlat*2.d0)*721 + 
-     +          idint(360.d0 + alpha1(dlon)*2.d0) + 1
+         irec = idnint(180.d0 - dlat*2.d0)*721 + 
+     +          idnint(360.d0 + alpha1(dlon)*2.d0) + 1
 
          if(irec.eq.ireco)  go to 90
 

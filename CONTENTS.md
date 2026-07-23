@@ -2,21 +2,21 @@
 
 ## DIRECTORY Hyposat-main. 
 
-HYPOSAT version 6.2b and HYPOMOD version 2.2b main directory with following contents
+HYPOSAT version 6.3a and HYPOMOD version 2.3 main directory with following contents
 
 
 ### Subdirectory ./bin/
 
 hyposat 
-	HYPOSAT-executable compiled for Linux (Rocky 9)
+	HYPOSAT-executable compiled and tested for Linux (Rocky 9)
 
 hypomod 
-	HYPOMOD-executable compiled for Linux (Rocky 9)
+	HYPOMOD-executable compiled and tested for Linux (Rocky 9)
 
 
 ### Subdirectory ./data/ 
  
-Data files used by HYPOSAT. For details and references see HYPOSAT_Manual.pdf
+Data files used by HYPOSAT. For details and references see HYPOSAT_Manual_6.3
 
 	ak135_A.hed 
 		Model AK135 file
@@ -74,11 +74,11 @@ Data files used by HYPOSAT. For details and references see HYPOSAT_Manual.pdf
 		Seismo-Tectonic Units, Level 3 (for parts of Europe)
 
 	crust1.bnds 
-		data file for model CRUST 1.0
+		data file used for model CRUST 1.0
 	crust1.vp 
-		data file for model CRUST 1.0
+		data file used for model CRUST 1.0
 	crust1.vs 
-		data file for model CRUST 1.0
+		data file used for model CRUST 1.0
 
 	std_crusts.dat 
 		crustal models of different spherically symetric Earth models
@@ -141,7 +141,8 @@ Data files used by HYPOSAT. For details and references see HYPOSAT_Manual.pdf
 #### Run scripts
 
 	run 
-		script to run one of the HYPOSAT example
+		script to run one of the HYPOSAT examples
+
 	run_hypomod_example 
 		script to run the HYPOMOD example
 
@@ -155,9 +156,9 @@ Data files used by HYPOSAT. For details and references see HYPOSAT_Manual.pdf
 		Schweitzer, J. (2018). Program Manual for HYPOSAT 6.0b (partly outdated) 
 		in "New Manual of Observatory Practice", 3rd edition, doi: 10.2312/GFZ.NMSOP-3_PD_11.1
 
-	HYPOSAT_Manual_6.2.pdf 
-		Schweitzer, J. (2025). HYPOSAT 6.2 and HYPOMOD 6.2 - The User Manual
-		doi: 10.21348/p.2025.0001
+	HYPOSAT_Manual_6.3.pdf 
+		Schweitzer, J. (2026). HYPOSAT 6.3 and HYPOMOD 6.3 - The User Manual
+		doi: 10.21348/p.2026.0005
 
 	HYPOSAT_HISTORY.md 
 		History of main changes in the software package from version to version
@@ -166,7 +167,7 @@ Data files used by HYPOSAT. For details and references see HYPOSAT_Manual.pdf
 		History of main changes in HYPOMOD from version to version
 
 	hyposat-parameter_all 
-		A file containing a list of all possible hyposat-parameter settings including their default values 
+		A file containing a list of all actual hyposat-parameter settings including their default values 
 
 ### Subdirectory ./msrc/ 
  
@@ -175,10 +176,10 @@ All source codes to compile your own executives of HYPOSAT and HYPOMOD on Linux 
 #### Source code of the main routines
 
 	hyposat.f 
-		HYPOSAT main program tested on Linux with gfortran
+		HYPOSAT main program 
  
 	hypomod.f 
-		HYPOMOD main program tested on Linux with gfortran
+		HYPOMOD main program
  
 #### Source code of the subroutines / functions
 
@@ -193,7 +194,7 @@ All source codes to compile your own executives of HYPOSAT and HYPOMOD on Linux 
 ##### Using Fortran:
 
 	hyposat_cross.f 
-	using Fortran
+	hyposat_circles.f
 	hyposat_crust.f
 	hyposat_crust_mod.f
 	hyposat_depth.f
@@ -230,12 +231,12 @@ All source codes to compile your own executives of HYPOSAT and HYPOMOD on Linux 
 	ttimes.h
 	ttlim.h
 
-#### Scripts for compilation on Linux systems
+#### Scripts for compilation on Linux and Windows systems
 
 	run_make 
 		Linux bash-script to run the Makefile for HYPOSAT or HYPOMOD
 	Makefile 
-		Makefile for HYPOSAT and HYPOMOD on LinuxA with gfortran and gcc
+		Makefile for HYPOSAT and HYPOMOD on Linux with gfortran and gcc
 
 	CMakeLists.txt: CMake setup for builds on Windows and Linux
 

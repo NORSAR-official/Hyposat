@@ -1385,7 +1385,7 @@ c   Update temporary variables for G;i-1.
       del(m)=del(k)
       sdel(m)=sdel(k)
       deli(m)=deli(k)
-      if(k.ge.5) go to 3
+      if(k.gt.4) go to 3
       d3h(m)=d3h(k)
       d1h(m)=d1h(k)
       dih(m)=dih(k)
@@ -1439,7 +1439,7 @@ c   Update temporary variables for G;i-1.
       del(m)=del(k)
       sdel(m)=sdel(k)
       deli(m)=deli(k)
-      if(k.ge.5) go to 5
+      if(k.gt.4) go to 5
       d3h(m)=d3h(k)
       d1h(m)=d1h(k)
       dih(m)=dih(k)

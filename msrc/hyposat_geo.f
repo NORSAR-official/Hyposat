@@ -29,6 +29,7 @@ c
 c     d2km  =  scaling factor degrees -> km
 c
       IMPLICIT real*8 (A-H,O-Z)
+      implicit integer (i-n)
 
       pi = 4.d0* datan(1.d0)
       pi2= pi/2.d0
@@ -317,8 +318,9 @@ c
 c
       subroutine delazd(elat1,elon1,azi,dis,ind,elat2,elon2)
       IMPLICIT real*8 (A-H,O-Z)
+      implicit integer (i-n)
       DIMENSION P1(2),PX(2),P2(2)
-      real*8 radloc
+      real*8 radloc, convlat, fcheck
 c
       ind2 = 0
 
@@ -340,7 +342,7 @@ c
       else if (ind.eq.1) then
          del=p2(1)
       else
-         print *, 'Wrong index for distance'
+         print *, 'Wrong index for distance format'
          return
       endif
 c
@@ -350,8 +352,9 @@ c
 c     without ellipticity correction esq=1.0d0 
 c
 c     A=90.0d0*rad-datan(dtan(P1(2)*RAD)*esq)
+c
 c     now done in convlat()
-
+c
       a= (90.0d0-convlat(P1(2),1))*rad
       C1=DCOS(A)
       C2=DSIN(A)
@@ -373,11 +376,11 @@ c     now done in convlat()
       ENDIF
       C6=DCOS(BX)
       C10=C1*C6+C5*DSIN(BX)
-      CX=F2(C10,2)
+      CX=FCHECK(C10,2)
       C11=(C6-C1*C10)/(C2*DSIN(CX))
       C12=DABS(C11)
       IF(C12.GT.1.d0) C11=C11/C12
-      BETX=F2(C11,2)
+      BETX=FCHECK(C11,2)
       IF(BX.GT.PI) BETX=PI2-BETX
       IF(AZ.GT.PI2) AZ=AZ-PI2
       IF(AZ.LT.0.d0) AZ=AZ+PI2
@@ -385,10 +388,6 @@ c     now done in convlat()
       IF(AZ.GT.PI.AND.AZ.LE.PI2) THEN
          PX(1)=P1(1)-BETX/RAD
       ENDIF
-
-c14    IF(PX(1).GT.180.0d0) PX(1)=PX(1)-360.0d0
-c      IF(PX(1).LT.-180.0d0) PX(1)=360.0d0+PX(1)
-c     px(2)=datan(dtan(pi/2.0d0-cx)/esq)/rad
 
 14    px(1) = alpha1(px(1))
       px(2)=convlat((90.d0-cx/rad),2)
@@ -407,18 +406,26 @@ c     px(2)=datan(dtan(pi/2.0d0-cx)/esq)/rad
 C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
-C     FUNCTION F2  limits the ACOS and ASIN for small numerical 
-C     instabilities.
+C     FUNCTION FCHECK alows small errors for DACOS and DASIN
+C     function input.
 C
-      FUNCTION F2(A,IND)
+C     31 Mar 2026 name changed from F2 to FCHECK
+C
+      FUNCTION FCHECK(A,IND)
       IMPLICIT real*8 (A-H,O-Z)
+      implicit integer (i-n)
+
+      fcheck = 999999.d99
       B=DABS(A)
       C=A
       IF(B.GT.1.0d0.AND.B.LT.1.00005d0) C=DSIGN(1.d0,A)
-      GOTO (1,2),IND
-1     F2=DASIN(C)
-      RETURN
-2     F2=DACOS(C)
+      if(ind.eq.1) then
+         FCHECK=DASIN(C)
+      else if(ind.eq.2) then
+         FCHECK=DACOS(C)
+      else
+         print *,'no valied input for function fcheck'
+      endif
       RETURN
       END
 C
@@ -458,6 +465,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       function dirdel(p0,zo0,fa,type)
 
       IMPLICIT real*8 (A-H,O-Z)
+      implicit integer (i-n)
 
       PARAMETER (nz=24)
 
@@ -610,6 +618,7 @@ c
       subroutine ellcal (elat,ax1,ax2,eps,fchi,elmax,elmin,eazi,earea)
 
       implicit real*8 (a-h,o-z)
+      implicit integer (i-n)
 
       real*8 elat,ax1(2),ax2(2),fchi,elmax,elmin,eazi,earea, eps
 
@@ -715,7 +724,7 @@ c
 c       Johannes Schweitzer, NORSAR, October 2, 1997
 c
         implicit real*8 (a-h,o-z)
-        integer ind
+        implicit integer (i-n)
 
         pi      = 4.d0*datan(1.d0)
         deg2rad = pi / 180.d0
@@ -765,6 +774,7 @@ C     author: Johannes Schweitzer, NORSAR
 C             June 2004
 C
       IMPLICIT real*8 (A-H,O-Z)
+      implicit integer (i-n)
 
       re=6371.d0
 

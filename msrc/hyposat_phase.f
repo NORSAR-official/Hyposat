@@ -126,7 +126,9 @@ c     lsurf = phase is a surface wave
 c
 c     April 2021, Johannes Schweitzer, NORSAR
 c
-c     latest changes 28 June 2022 (depth phases added)
+c     changes 28 June 2022 (depth phases added)
+c
+c     last changes June 2026 (more options and some cleaning up)
 c
       subroutine check_phase (phid,imin,del,dis,dt,lsurf,lcon,lmoh)
       character*8  phid
@@ -188,23 +190,26 @@ c
          goto 100
       endif
 
-      if (phid.eq.'Pb' .and. .not.lcon) then
-         phid = 'Pg'
-         imin = 1
+      if (phid.eq.'Pb') then 
+         if(lcon .or. lmoh) then
+            phid = 'Pn'
+            imin = 2
+         else  
+            phid = 'Pg'
+            imin = 1
+         endif
          goto 100
       endif
 
       if (phid.eq.'Pg') then
          if(dt.lt.0.d0) then
-            if(dis.gt.150.d0) then
-               phid = 'Pn'
-            else if(.not.lmoh) then
-               phid = 'Pb'
-            endif
+            if(dis.gt.150.d0 .or. lmoh) phid = 'Pn'
+            if(dis.le.150.d0 .and. .not.lmoh) phid = 'Pb'
             imin = 2
             goto 100
          else if(dt.gt.0.d0) then
-            if(dis.lt.150.d0) phid = 'Pn'
+            if(dis.le.150.d0 .or. lmoh) phid = 'Pn'
+            if(dis.gt.150.d0 .and. .not.lmoh) phid = 'Pb'
             imin = 2
             goto 100
          endif
@@ -217,11 +222,11 @@ c
       endif
 
       if (phid.eq.'Sn') then
-         if(dis.le.350.d0 .and. .not.lmoh) then
+         if(dis.le.400.d0 .and. .not.lmoh) then
             phid = 'Sb'
             imin = 1
             goto 100
-         else if(dis.gt.350.d0 .and. dt.gt.0.d0) then
+         else if(dis.gt.400.d0 .and. dt.gt.0.d0) then
             if(del.lt.13.d0) then
                phid = 'SnSn'
                imin = 1
@@ -239,38 +244,40 @@ c
          goto 100
       endif
 
-      if (phid.eq.'Sb' .and. .not.lcon) then
-         phid = 'Sg'
-         imin = 1
-         goto 100
-      endif
-
-      if(phid.eq.'Lg' .and. dt.lt.0.d0) then
-         phid = 'Sn'
-         imin = 1
-         lsurf = .false.
+      if (phid.eq.'Sb') then
+         if(lcon .or. lmoh) then
+            phid = 'Sn'
+            imin = 2
+         else 
+            phid = 'Sg'
+            imin = 1
+         endif
          goto 100
       endif
 
       if (phid.eq.'Sg') then
          if(dt.lt.0.d0) then
-            if(dis.gt.150.d0) then
-               phid = 'Sn'
-            else
-               phid = 'Sb'
-            endif
+            if(dis.gt.150.d0 .or. lmoh) phid = 'Sn'
+            if(dis.le.150.d0 .and. .not.lmoh) phid = 'Sb'
             imin = 2
             goto 100
-         else  if(dt.gt.0.d0) then
-            if(dis.lt.150.d0) then
-               phid = 'Sn'
-            else
-               phid = 'Lg'
-               lsurf = .true.
-            endif
+         else if(dt.gt.0.d0) then
+            if(dis.le.150.d0 .or. lmoh) phid = 'Sn'
+            if(dis.gt.150.d0 .and. .not.lmoh) phid = 'Sb'
             imin = 2
             goto 100
          endif
+      endif
+
+      if(phid.eq.'Lg') then
+         if(dt.lt.0.d0) then
+            phid = 'Sn'
+         else
+            phid = 'Sg'
+         endif
+         imin = 1
+         lsurf = .false.
+         goto 100
       endif
 
 c
@@ -287,52 +294,53 @@ c
             phid = 'PKPab'
             imin = 2
             goto 100
-         else if(dt.lt.0.d0) then
+         else 
             phid = 'PKPdf'
             imin = 1 
             goto 100
          endif
       endif
 
-      if (phid.eq.'PKPab' .and. del.le.156.d0) then
-         if(dt.lt.0.d0) then
+      if (phid.eq.'PKPab' .and. dt.lt.0.d0) then
+         if(del.le.156.d0) then
             phid = 'PKPbc'
             imin = 1
             goto 100
+         else
+            phid = 'PKPdf'
+            imin = 2
          endif
-      else if(phid.eq.'PKPab' .and. del.gt.156.d0 .and. dt.lt.0.d0) then
-         phid = 'PKPdf'
-         imin = 2
-         goto 100
       endif
 
-      if (phid.eq.'PKPdf' .and. dt.lt.0.d0 ) then
-         if(del.le.103.d0) then
-            phid = 'P'
-            imin = 1
-            goto 100
-         else if(del.le.143.d0) then
-            phid = 'Pdif'
-            imin = 2
-            goto 100
-         else if(del.le.150.d0) then
-            phid = 'PKPbc'
-            imin = 2
-            goto 100
-         endif
-      else if(phid.eq.'PKPdf' .and. dt.gt.0.d0 ) then
-         if(del.le.143.d0 .and. del.gt.113.d0) then
-               phid = 'PKiKP'
+      if (phid.eq.'PKPdf') then
+         if(dt.lt.0.d0 ) then
+            if(del.le.103.d0) then
+               phid = 'P'
+               imin = 1
+               goto 100
+            else if(del.le.143.d0) then
+               phid = 'Pdif'
                imin = 2
                goto 100
-         else if (del.gt.143.d0 .and. del.le.156.d0) then
-            phid = 'PKPbc'
-            imin = 2
-            goto 100
-         else if (del.gt.156.d0) then
-            phid = 'PKPab'
-            imin = 2
-            goto 100
+            else if(del.le.150.d0) then
+               phid = 'PKPbc'
+               imin = 2
+               goto 100
+            endif
+         else 
+            if(del.le.143.d0 .and. del.gt.113.d0) then
+                  phid = 'PKiKP'
+                  imin = 2
+                  goto 100
+            else if (del.gt.143.d0 .and. del.le.156.d0) then
+               phid = 'PKPbc'
+               imin = 2
+               goto 100
+            else if (del.gt.156.d0) then
+               phid = 'PKPab'
+               imin = 2
+               goto 100
+            endif
          endif
       endif
 
@@ -356,12 +364,16 @@ c
 c     2 February 2018: P'P'P' + S'S'S' added
 c
 c     October 2020 & April 2021 some changes in logics
+c
+c     July 2026: new structured
 c  
       subroutine testphase (phid0,icha,dis)
       real*8 dis
       integer icha
-      character phid*8,phid0*8,s*1, phidd*8
+      character phid*8,phid0*8,s*1, phidd*8, phase_o(20)*8
       logical flags
+
+      save phase_o
 
       flags = .false.
       phid = phid0
@@ -381,100 +393,106 @@ c
 
       if(phid(1:1).ne.'P' ) go to 20
 
-      if (dis.gt.113.d0) then
-         if(icha.ge.7) go to 50
+      if(dis.gt.100.d0) then
+
          if(phid.eq.'Pg' .or. phid.eq.'Pb' .or. phid.eq.'Pn') then
             phid='P'
             goto 100
          endif
-         if(phid(1:4).eq.'Pdif' .or. phid.eq.'P') then
+
+         if(phid.eq.'P') then
+            phid='Pdif'
+            goto 100
+         endif
+
+         if(phid.eq.'Pdif') then
             phid='PKPdf'
             goto 100
          endif
-         if(phid(1:4).eq.'PKP ') then
+
+         if(phid.eq.'PKP') then
             phid='PKPdf'
             goto 100
          endif
+
          if(phid(1:5).eq.'PKPdf' .and. dis.lt.160.d0) then
             phid='PKiKP'
             goto 100
          endif
-         if(dis.gt.143.d0) then
-            if(dis.lt.160.d0) then
-               if(phid(1:6).eq.'PKiKP' .or. phid(1:5).eq.'PKPdf') then
-                  phid='PKPbc'
-                  goto 100
-               endif
-               if(phid(1:5).eq.'PKPbc') then
-                  phid='PKPab'
-                  goto 100
-               endif
+
+         if(dis.gt.155.d0) then
+            if(phid(1:6).eq.'PKiKP') then
+               phid='PKPdif'
+               goto 100
             endif
-            if(dis.gt.155.d0) then
-               if(phid(1:6).eq.'PKiKP' .or. phid(1:5).eq.'PKPdf') then
-                  phid='PKPdif'
-                  goto 100
-               endif
-               if(phid(1:5).eq.'PKPbc') then
-                  phid='PKPdif'
-                  goto 100
-               endif
-               if(phid(1:5).eq.'PKPdif') then
-                  phid='PKPab'
-                  goto 100
-               endif
+            if(phid(1:5).eq.'PKPbc') then
+               phid='PKPdif'
+               goto 100
             endif
-            if(phid(1:5).eq.'PKPab') then
-               phid='Pdif'
+            if(phid(1:5).eq.'PKPdif') then
+               phid='PKPab'
                goto 100
             endif
          endif
-         go to 50
-      endif
 
-      if(icha.ge.7) go to 50
-
-      if(phid(1:4).eq.'Pdif' .and. dis.lt.105.d0) then
-         phid='P'
-         goto 100
-      endif
-
-      if(dis.lt.3.d0) then
-         if(phid.eq.'PmP') then
-            phid='Pn'
+         if(dis.gt.143.d0 .and. dis.le.155.d0) then
+            if(phid(1:6).eq.'PKiKP') then
+               phid='PKPbc'
+               goto 100
+            endif
+            if(phid(1:5).eq.'PKPbc') then
+               phid='PKPab'
+               goto 100
+            endif
+         endif
+         
+         if(phid(1:6).eq.'PKiKP') then
+            phid='Pdif'
             goto 100
          endif
-         if(phid.eq.'PbP') then
+
+         if(phid(1:5).eq.'PKPab') then
+            phid='Pdif'
+            goto 100
+         endif
+
+      else
+
+         if(dis.lt.3.d0) then
+            if(phid.eq.'PmP') then
+               phid='Pn'
+               goto 100
+            else if(phid.eq.'PbP') then
+               phid='Pb'
+               goto 100
+            endif
+         else
+            if(phid.eq.'PmP' .or. phid.eq.'PbP') then
+               phid='Pg'
+               goto 100
+            endif
+         endif
+
+         if(phid.eq.'P') then
+            if(dis.lt.25.d0) then
+               phid='Pn'
+               goto 100
+            endif
+         endif
+
+         if(phid.eq.'Pn') then
             phid='Pb'
             goto 100
          endif
-      else
-         if(phid.eq.'PmP' .or. phid.eq.'PbP') then
+         if(phid.eq.'Pb') then
             phid='Pg'
             goto 100
          endif
-      endif
-
-      if(phid.eq.'P') then
-         if(dis.lt.25.d0) then
-            phid='Pn'
+         if(phid.eq.'Pg') then
+            phid='P'
             goto 100
-         else
-            goto 50
          endif
-      endif
 
-      if(phid.eq.'Pn') then
-         phid='Pb'
-         goto 100
-      endif
-      if(phid.eq.'Pb') then
-         phid='Pg'
-         goto 100
-      endif
-      if(phid.eq.'Pg') then
-         phid='P'
-         goto 100
       endif
 
       if(phid(1:5).eq."P'P' ") then
@@ -489,6 +507,11 @@ c
          phid="P'P'df"
          goto 100
       endif
+      if(phid(1:6).eq."P'P'df") then
+         phid="P'P'ab"
+         goto 100
+      endif
+
       if(phid(1:7).eq."P'P'P' ") then
          phid="P'P'P'ab"
          goto 100
@@ -501,6 +524,11 @@ c
          phid="P'P'P'df"
          goto 100
       endif
+      if(phid(1:8).eq."P'P'P'df") then
+         phid="P'P'P'ab"
+         goto 100
+      endif
+
       if(phid(1:6).eq.'PKKP  ') then
          phid='PKKPab'
          goto 100
@@ -513,22 +541,23 @@ c
          phid='PKKPdf'
          goto 100
       endif
+      if(phid(1:6).eq.'PKKPdf') then
+         phid='PKKPab'
+         goto 100
+      endif
 
       if(phid.eq.'PP') then
          phid='PnPn'
          goto 100
       endif
-
       if(phid.eq.'PnPn') then
          phid='PbPb'
          goto 100
       endif
-
       if(phid.eq.'PbPb') then
          phid='PgPg'
          goto 100
       endif
-
       if(phid.eq.'PgPg') then
          phid='PP'
          goto 100
@@ -538,17 +567,14 @@ c
          phid='PnPnPn'
          goto 100
       endif
-
       if(phid.eq.'PnPnPn') then
          phid='PbPbPb'
          goto 100
       endif
-
       if(phid.eq.'PbPbPb') then
          phid='PgPgPg'
          goto 100
       endif
-
       if(phid.eq.'PgPgPg') then
          phid='PPP'
          goto 100
@@ -559,17 +585,21 @@ c
          goto 100
       endif
 
-20    if(icha.ge.10) go to 30
+      go to 50
+
+20    continue
+
+      if(phid(1:1).eq.'L') go to 30
 
       if(phid.eq.'SKS') then
          phid='SKSac'
          goto 100
       endif
-      if(phid.eq.'SKSdf') then
-         phid='SKSac'
+      if(phid.eq.'SKSac') then
+         phid='SKSdf'
          goto 100
       endif
-      if(phid.eq.'SKSac') then
+      if(phid.eq.'SKSdf') then
          if(dis.lt.90.d0) then
             phid='S'
             goto 100
@@ -578,6 +608,7 @@ c
             goto 100
          endif
       endif
+
       if(phid(1:4).eq.'Sdif' .and. dis.lt.105.d0) then
          phid='S'
          goto 100
@@ -586,45 +617,52 @@ c
          if(dis.lt.25.d0) then
             phid='Sn'
             goto 100
-         else  if(dis.gt.50.d0) then
+         else if(dis.gt.50.d0) then
             phid='SKSac'
             goto 100
-         else
-            goto 50
          endif
       endif
-      if(phid.eq.'SmS') then
-         phid='Sn'
-         goto 100
+
+      if(dis.lt.3.d0) then
+         if(phid.eq.'SmS') then
+            phid='Sn'
+            goto 100
+         else if(phid.eq.'SbS') then
+            phid='Sb'
+            goto 100
+         endif
+      else
+         if(phid.eq.'SmS' .or. phid.eq.'SbS') then
+            phid='Sg'
+            goto 100
+         endif
       endif
+
       if(phid.eq.'Sn') then
-         phid='Sb'
-         goto 100
-      endif
-      if(phid.eq.'SbS') then
          phid='Sb'
          goto 100
       endif
       if(phid.eq.'Sb') then
          phid='Sg'
-         goto 100
+         go to 100
       endif
-
       if(phid.eq.'Rg') then
          phid='Sg'
          goto 100
       endif
-      if(phid.eq.'Lg') then
-         phid='Sg'
-         goto 100
-      endif
+
       if(phid(1:2).eq.'Sg') then
          if(dis.gt.50.d0) then
-            phid='SKSdf'
+            phid='SKSac'
             goto 100
          else
-            phid='S'
-            goto 100
+            if(dis.lt.30.d0)   then
+               phid = 'Sn'
+               go to 100
+            else
+               phid='S'
+               goto 100
+            endif
          endif
       endif
 
@@ -636,6 +674,10 @@ c
          phid="S'S'df"
          goto 100
       endif
+      if(phid.eq."S'S'df") then
+         phid="S'S'ac"
+         goto 100
+      endif
 
       if(phid.eq."S'S'S'") then
          phid="S'S'S'ac"
@@ -645,6 +687,10 @@ c
          phid="S'S'S'df"
          goto 100
       endif
+      if(phid.eq."S'S'S'df") then
+         phid="S'S'S'ac"
+         goto 100
+      endif
 
       if(phid.eq.'SKKS') then
          phid='SKKSac'
@@ -652,6 +698,10 @@ c
       endif
       if(phid.eq.'SKKSac') then
          phid='SKKSdf'
+         goto 100
+      endif
+      if(phid.eq.'SKKSdf') then
+         phid='SKKSac'
          goto 100
       endif
 
@@ -694,7 +744,14 @@ c
          goto 100
       endif
 
-30    if(icha.ge.3 .and. phid(1:1).eq.'L') go to 50
+      go to 50
+
+30    continue
+
+      if(phid.eq.'Lg') then
+         phid='Sg'
+         goto 100
+      endif
 
       if(phid.eq.'L') then
          phid='LQ'
@@ -712,12 +769,20 @@ c
 50    icha = 999
       return
 
-100   icha = icha+1
+100   continue
+
       if(flags) then
          phid0= s // phid(1:7)
       else
          phid0 = phid
       endif
+
+      do 150 j=1,icha
+      if(phase_o(icha).eq.phid) go to 50
+150   continue
+
+      icha = icha + 1
+      phase_o(icha) = phid
 
       return
       end

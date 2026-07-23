@@ -1,14 +1,14 @@
-HYPOSAT Version 6.2a2
+HYPOSAT Version 6.3a
 
 Event solution by HYPOSAT
 
 GERESS 1996-205:04.08
 
-No initial solution from multiple backazimuth observations possible.
+Initial epicenter set from station GERES with an estimated BAZ of 243.2 [deg] at a distance of  587.0 [km]
 
-Epicenter set from station GERES with backazimuth 243.2 [deg], delta  586.95 [km]
-Epicenter lat:   46.261 [deg]
-Epicenter lon:    6.896 [deg]
+Parameters of initial solution (+/- 1 standard deviation):
+Epicenter lat:   46.261 +/-   10.000 [deg]
+Epicenter lon:    6.896 +/-   10.000 [deg]
 
 Source time (set):  838094945.248 [s]
 

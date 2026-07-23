@@ -11,18 +11,17 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOMOD_2_2b
+      program HYPOMOD_2_3
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
       character  version*25, VDATE*20
-      parameter (version='HYPOMOD Version 2.2b    ')
-c     parameter (vdate=' ( 08 December 2025)' )
-      parameter (vdate=' ' )
+      parameter (version='HYPOMOD Version 2.3     ')
+      parameter (vdate=' ( 8 July 2026)' )
 
 c
-c     last changes:  08 December 2025
+c     last changes:  8 July 2026
 c
 c----------------------------------------------------------------------
 c
@@ -37,7 +36,7 @@ c     All input and output files are identical to hyposat.
 c     See HYPOSAT manual for details. However some features are just
 c     ignored because we do not invert any data!
 c
-c     HYPOMOD 2.1a is based on HYPOSAT 6.1f
+c     HYPOMOD 3 is based on HYPOSAT 6.3
 c
 c--------------------------------------------------------------------
 c
@@ -54,7 +53,7 @@ c                dlsq ellcal, ellip, elpcor, epmagc, fetoh2, fhtoe,
 c                findrange, get_mod_c10, get_mod_global, 
 c                get_mod_reg, get_station, hyposat_cross, hyposat_geo, 
 c                hyposat_gmi, indexx, magfact, mult_ons, 
-c                plane, tauget_mod, tauget_ray, testphase, ttloc, zo2to
+c                tauget_mod, tauget_ray, testphase, ttloc, zo2to
 c
 c     functions: alpha1, alpha2, convlat, phase_type, phasw,
 c                dirdel, q2, radloc, rdig,
@@ -111,7 +110,7 @@ c
      +          string*550,touse(mread)*9,touse0*9,phidr*8,
      +          o_string*550,textout*160,text(mread)*160,
      +          arid(mread)*8,statcorstr*80, texth*160,phid0*8,
-     +          usedm*6,phsearch*1,
+     +          usedm*6,phsearch*1, phase_tu*1,
      +          useds*6, usedr*1, usedsr*1, stringt*30, onflag(mread)*3
 
       dimension azi(mread),tt(mread),p(mread),
@@ -132,7 +131,7 @@ c
 
       character art*16, mtyp0*3
 
-      real*4 rzo,rdel,razi,rzo1,rdel1,rmcorr, rdelk
+      real*4 rzo,rdel,razi,rzo1,rdel1, rdelk
 
       logical first
       real*4  zso
@@ -181,7 +180,7 @@ c
 c     other variables
 c
       integer   yy,mon,dd,hh,idoy,ierr,typctl,mi,idum, isreg, regnum,
-     +          y00, mon00, d00, h00, ierc
+     +          y00, mon00, d00, h00
 
       character mm*4,name*48
       real*8    lat,lon,dlati,dloni,ddepi, elevs, cpq, cpq2
@@ -203,8 +202,21 @@ c
      +          sloflag, isf_epi, 
      +          firstph, first2, ldepth0,
      +          old_syntax, emerout, larid, 
-     +          primef, 
+     +          primef, fmoho,
      +          eflag , lmaxm
+
+      character arg*2
+      icom = command_argument_count()
+
+      if(icom.gt.0) then
+         call getarg(1,arg)
+         if(arg.eq.'-v') then
+           print*,trim(version), trim(vdate)
+           go to 99999
+         endif
+         print *,' WRONG argument for HYPOMOD'
+         go to 99999
+      endif
 
 c
 c     some constants and initial or default values
@@ -293,7 +305,12 @@ c
       epilon0 = -999.d0
       tome0   = -2840140801.d0
 
+      ttdmin = 2.0d0
+
       iwl = 0
+
+      sglgdis0 = 50.d0
+      sglgdis = -999.d0
 
       string   = ' '
       o_string = ' '
@@ -613,7 +630,7 @@ c
 
       if(string(1:12).eq.'OUTPUT LEVEL') then
           read (string(icolon2:),*) typctl
-          if(typctl.lt.-1)   typctl = 0
+          if(typctl.lt.-1)   typctl = -1
           if(typctl.ge.40)  typctl = 4
           if(typctl.gt.10) then
              itypn = mod(typctl,10)
@@ -644,6 +661,11 @@ c
           diffflag = .true.
           read (string(icolon2:),*) intinp
           if(intinp.ne.1) diffflag = .false.
+          go to 1
+      endif
+
+      if(string(1:34).eq.'MIN ALLOWED TRAVEL-TIME DIFFERENCE') then
+          read (string(icolon2:),*) ttdmin
           go to 1
       endif
 
@@ -808,6 +830,14 @@ c
           intinp = 0
           read (string(icolon2:),*) intinp
           if(intinp.gt.0 .and. intinp.lt.6) iwl = intinp
+          go to 1
+      endif
+
+      if(string(1:15).eq.'SG--LG DISTANCE') then
+          abc = -999.d0
+          read (string(icolon2:),*) abc
+          if(abc.gt.0.d0) sglgdis = abc
+          if(sglgdis0.lt.sglgdis) sglgdis0 = sglgdis
           go to 1
       endif
 
@@ -1099,7 +1129,7 @@ c
 
       if(output) then
          open (unit=11,file=outputfile)
-         write (11,'(a,/)') trim(title)
+         write (11,'(a,/)') trim(version)
          write (11,'(''Event solution by input from '',a,/)') 
      +          trim(author)
       endif
@@ -1197,7 +1227,10 @@ c
 
       else
          if(output) write (11,'(a,/)') trim(title)
-         print *,'EVENT ',trim(title)
+         if(typctl.ge.0) then
+            print *,'EVENT ',trim(title)
+            print *,' '
+         endif
       endif
 
       timemin = 9999999999.d0
@@ -1651,7 +1684,7 @@ c     print*, timeo,jdate,yy,mon,mm,dd,idoy,hh,mi,sec
             chgcas = uppcas(phidd(3:3))
             if(chgcas.eq.'L') phase(ii) = 'AML'
             if(chgcas.eq.'S') phase(ii) = 'AMs'
-            if(chgcas.eq.'B') phase(ii)(1:2) = 'Amb'
+            if(chgcas.eq.'B') phase(ii) = 'Amb'
             go to 63
          endif
       endif
@@ -1828,7 +1861,7 @@ c       print *,vlflag,vp,vs
       if(pin.le.0.d0) pin = -999.d0
 
       if(islow.eq.0 .and. pin.gt.0.0d0) then
-         p(ii)  = radloc(stala(iev(ii)),1)*deg2rad/pin
+         p(ii)  = radloc(stala(j),1)*deg2rad/pin
       else
          p(ii) = pin
          if(pin.gt.0.d0) then
@@ -1841,11 +1874,11 @@ c       print *,vlflag,vp,vs
       phase_t = chgcas(1:1)
 
       if(phase_t.eq.'P')  then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.2) 
-     +       istaph(iev(ii))=istaph(iev(ii)) + 1
+         if(istaph(j).eq.0 .or. istaph(j).eq.2) 
+     +       istaph(iev)=istaph(j) + 1
       else if(phase_t.eq.'S') then
-         if(istaph(iev(ii)).eq.0 .or. istaph(iev(ii)).eq.1)
-     +       istaph(iev(ii))=istaph(iev(ii)) + 2
+         if(istaph(j).eq.0 .or. istaph(j).eq.1)
+     +       istaph(j)=istaph(j) + 2
       endif
 
       if(phase(ii)(1:1).eq. 'P' .and. phase(ii)(3:3).eq. ' ')
@@ -2053,8 +2086,9 @@ c
      +        d2km)
          rzo   = sngl(zo)
          delta = del(iev(i))
+         dk    = delk(iev(i))
          rdel  = sngl(delta)
-         rdelk = sngl(delk(iev(i)))
+         rdelk = sngl(dk)
 
          fla1 = deg2rad*(90.d0-elatm)
          razi = sngl(azie(iev(i)))
@@ -2079,10 +2113,14 @@ c
          loctt = 0
          nphas = 0
 
+         fmoho = .false.
+
          if(imod2.eq.0 .or. delta.gt.rmax0 .or. zo.gt.zmax) then
 
            call tauget_mod(rzo,rdel,nphas,phcd,ttc,dtdd,
      +                         dtdh,dddp,modn)
+
+           if(zo.ge.zmoho(modind)) fmoho = .true.
 
          else
 
@@ -2102,12 +2140,13 @@ c
            loctt = 1
            loctts = loctts + 1
 
+           if(zo.ge.dmoho) fmoho = .true.
+
          endif
 
-         if(delk(iev(i)).gt.30.d0 .and. zo.lt.35.d0 .and.
-     +      delk(iev(i)).gt.3.d0*zo ) then
+         if(.not.fmoho .and. dk.ge.sglgdis0) then
             nphas       = nphas + 1
-            ttc(nphas)  = delk(iev(i))/vlg
+            ttc(nphas)  = dk/vlg
             dtdd(nphas) = d2km/vlg
             dtdd(nphas) = d2km/vlg
             dtdh(nphas) = 0.d0
@@ -2205,16 +2244,27 @@ c
 
       surf = .false.
  
-      if(phid.eq.'Rg') then
-         surf = .true.
-         vsurf = vrg
+      if(sglgdis.gt.0.d0) then
+
+         if(phid.eq.'Sg' .and. dk.ge.sglgdis .and. sglgdis.gt.0.d0) then
+            dttlg = ttobs - tome - dk/vlg
+            if(dttlg.gt.-15.d0) phid = 'Lg'
+         endif
+
+         if(phid.eq.'Lg' .and. dk.lt.sglgdis0) phid = 'Sg'
+
       endif
-                
+
       if(phid.eq.'Lg' ) then
          surf = .true.
          vsurf = vlg
       endif
  
+      if(phid.eq.'Rg') then
+         surf = .true.
+         vsurf = vrg
+      endif
+                
       if(phid.eq.'LR') then
          surf = .true.
          vsurf = vlr
@@ -2237,7 +2287,7 @@ c
 
       if(surf .and. phid.ne.'Lg') then
          nphas       = nphas + 1
-         ttc(nphas)  = delk(iev(i))/vsurf
+         ttc(nphas)  = dk/vsurf
          dtdd(nphas) = d2km/vsurf
          dtdh(nphas) = 0.d0
          phcd(nphas) = phid
@@ -2258,6 +2308,8 @@ c     print *,'---> (e-0) ', i,phase(i),phid,phaseu(i),useds,surf,icha
       first2 = .false.
       j = 0
 
+      phase_tu = phase_type(phaseu(i))
+
       do 420 j1 = 1,nphass
 
       j = j + 1
@@ -2269,7 +2321,10 @@ c
       phid1 = phcd(j)
 
       phase_t = phase_type(phid1)
+
       if(phsearch.ne.' ' .and. phsearch.ne.phase_t) go to 420
+
+      if(phase_t.ne.phase_tu .and. phase_tu.ne.' ') go to 420
 
       dpa   = 0.d0
       dpaa  = 0.d0
@@ -3116,7 +3171,7 @@ c
            imsm = 0
            dmsm = 0.d0
            sdms = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4511 im = 1,nstat
                  if(stams(im).gt.-9.9d0) then
                     imsm = imsm + 1
@@ -3138,7 +3193,7 @@ c
            imlm = 0
            dmlm = 0.d0
            sdml = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4513 im = 1,nstat
                  if(staml(im).gt.-9.9d0) then
                     imlm = imlm + 1
@@ -3160,7 +3215,7 @@ c
            imbm = 0
            dmbm = 0.d0
            sdmb = 0.d0
-           if(.not.lmaxm) then
+           if(lmaxm) then
               do 4515 im = 1,nstat
                  if(stamb(im).gt.-9.9d0) then
                     imbm = imbm + 1
@@ -3299,11 +3354,6 @@ c
      
       if(.not.diffflag) go to 466
 
-      if(output) then
-        write(11,'(/''Defining travel-time differences:''/)')
-        write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
-      endif
-
       i2 = 0
       sdmean  = 0.d0
       sdrmean = 0.d0
@@ -3318,14 +3368,27 @@ c
          if(used(j)(4:4).ne.'D') go to 460
 
          if(iev(i).ne.iev(j)) go to 460
+
          if(phaseu(i).eq.phaseu(j)) go to 460
+
+         if(dabs(tt(i)-tt(j)).le.1.d-3) go to 460
+
+         if(dabs(tttr(i)-tttr(j)).lt.ttdmin .and.
+     +      phase_type(phaseu(i)).eq.phase_type(phaseu(j)))  go to 460
+
+         if(((tt(j).gt.tt(i)) .and. (tttr(j).lt.tttr(i))) .or.
+     +       ((tt(i).gt.tt(j)) .and. (tttr(i).lt.tttr(j))) ) go to 460
 
          i2    = i2 + 1
          arr(i2) = sngl(del(iev(i)))
 
          dtth  = tttr(j) - tttr(i)
          dtobs = tt(j) - tt(i)
-         dtres = dtobs - dtth
+         if(dtth.lt.0.d0) then
+            dtres = dtth - dtobs
+         else
+            dtres = dtobs - dtth
+         endif
 
          sdmean  = sdmean  + dtres
          sdrmean = sdrmean + dabs(dtres)
@@ -3373,11 +3436,27 @@ c
 
 461   continue
 
+      if(ndmisf.eq.0) go to 466
       sdmean  = sdmean / dble(ndmisf)
       sdrmean = sdrmean / dble(ndmisf)
       rmsdt   = dsqrt(rmsdt  / dble(ndmisf))
 
       if(output) then
+
+         if(i2.lt.10) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i2,'' ):''/)') i2
+         else if(i2.gt.10 .and. i2.lt.100) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i3,'' ):''/)') i2
+         else if(i2.gt.100 .and. i2.lt.1000) then
+            write(11,'(/''Defining travel-time differences ('',
+     +            i4,'' ):''/)') i2
+         else
+            write(11,'(/''Defining travel-time differences ('',
+     +            i5,'' ):''/)') i2
+         endif
+         write(11,'('' Stat  Delta  Phases'',11x,''Observed   Res''/)')
 
          call indexx(i2,arr,indx)
 
@@ -3559,7 +3638,8 @@ c
 
       if(output) close(11)
 
+99999 continue
       stop
 
-c     end program HYPOMOD_2.1
+c     end program HYPOMOD_2.3
       end 

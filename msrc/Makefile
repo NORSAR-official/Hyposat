@@ -4,7 +4,7 @@
 #                                                            #
 # July 2013 , Johannes Schweitzer, NORSAR                    #
 #                                                            #
-#  status: May 2025                                          #
+#  status: July 2026                                          #
 #                                                            #
 #  johannes@norsar.no                                        #
 #                                                            #
@@ -18,7 +18,7 @@ prog = hyposat
 prog2 = hypomod
 
 obj1 = hyposat.o
-obj2 = hyposat_lib.o hyposat_file.o hyposat_cross.o hyposat_geo.o hyposat_geotab.o hyposat_phase.o hyposat_plane.o hyposat_inv.o
+obj2 = hyposat_lib.o hyposat_file.o hyposat_cross.o hyposat_geo.o hyposat_geotab.o hyposat_phase.o hyposat_plane.o hyposat_inv.o hyposat_circles.o
 obj3 = hyposat_crust.o hyposat_crust_mod.o hyposat_mag.o hyposat_loc.o hyposat_depth.o hyposat_time.o  hyposat_out.o
 obj4 = hyposat_numr.o hyposat_clib.o isf_in.o isf_out.o libtau_h.o jsonstorage.o
  
@@ -33,12 +33,14 @@ hyposat :
 hyposat : $(obj1) $(obj2) $(obj3) $(obj4) 
 	$(LD) $(LDPP) $(LFLAG) -o $(prog) $(obj1) $(obj2) $(obj3) $(obj4) 
 
+	chmod 755 $(prog)
 	mv $(prog) $(DEST)
 
 hypomod : 
 hypomod : $(objm) $(objm2) $(objm3) $(objm4)
 	$(LD) $(LFLAG) -o $(prog2) $(objm) $(objm2) $(objm3) $(objm4)
 
+	chmod 755 $(prog2)
 	mv $(prog2) $(DEST)
 
 .SUFFIXES: .o

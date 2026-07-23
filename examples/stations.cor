@@ -11,7 +11,7 @@
 *
 * Vp or Vs given in this file for a specific station always
 * overrides values given by the parameters
-* P-VELOCITY TO CORRECT ELEVATION and 
+* P-VELOCITY TO CORRECT ELEVATION and
 * S-VELOCITY TO CORRECT ELEVATION or defined by CRUST 1.0
 *
 *      vp  vs

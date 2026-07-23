@@ -1,19 +1,18 @@
-HYPOSAT Version 6.2b
+HYPOSAT Version 6.3a
 
 Event solution by HYPOSAT
 
 NORTHERN MOLUCCA SEA, 1996 29 June, converted from pIDC's Reviewed Event Bulletin (REB)
 
+Initial epicenter calculated from    11 backazimuth-observation pairs
 
 Parameters of initial solution (+/- 1 standard deviation):
-
-Mean epicenter calculated from   136 backazimuth observation pairs
-Mean epicenter lat:   35.210 +/-    42.049 [deg]
-Mean epicenter lon:  118.957 +/-     6.721 [deg]
+Epicenter lat:   29.395 +/-    0.585 [deg]
+Epicenter lon:  115.468 +/-    0.582 [deg]
 
 S-P Travel-time difference type 1 with   2 observation(s)
-   to=   836008582.7 +/-  11.6 [s] Vp/Vs= 1.76 +/- 0.04
-Mean source time:  836008582.700 +/-  11.636 [s]
+   to=   836008582.7 +/-  15.7 [s] Vp/Vs= 1.76 +/- 0.04
+Mean source time:  836008582.700 +/-  15.671 [s]
 Mean       vp/vs:          1.758 +/-   0.035
 
 Iterations        :    9
@@ -83,7 +82,7 @@ DBIC  130.605 279.96 PKPdf   PKiKP    00 55 57.100  -0.276                      
 PLCA  137.981 160.77 PKPdf            00 56  9.100  -0.689 311.90  106.23  6.40   4.56 T         4.40         0.90  0.900         E   5.51 abcdef35
 LPAZ  159.482 136.90 PKPdf            00 56 44.700  -0.492                             T                                          E   3.44 abcdef36
 
-Defining travel-time differences:
+Defining travel-time differences ( 4 ):
 
  Stat  Delta  Phases           Observed   Res
 
@@ -189,7 +188,7 @@ DBIC  130.604 279.88 PKPdf            00 55 57.100   0.812                      
 PLCA  137.904 160.82 PKPdf            00 56  9.100  -0.319 311.90  106.30  6.40   4.56 T         4.40         0.90  0.900         E   7.65 abcdef35
 LPAZ  159.429 137.09 PKPdf            00 56 44.700  -0.178                             T                                          E   4.78 abcdef36
 
-Defining travel-time differences:
+Defining travel-time differences ( 7 ):
 
  Stat  Delta  Phases           Observed   Res
 

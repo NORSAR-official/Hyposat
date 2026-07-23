@@ -2,7 +2,7 @@
 
 HYPOSAT/ HYPOMOD are file-in file-out utilities for localization of seismic events that have been around for many decades.
 It has previously been shared to those interested via mail or ftp.
-From version 6.2, it is available in GitHub
+From version 6.2 on, it is available in GitHub
 
 The program package consists mainly of Fortran code, and is put together by Johannes Schweitzer at NORSAR since 1997 and before at the Ruhr-Univerity Bochum, Germany. 
 
@@ -21,7 +21,7 @@ Schweitzer, J. (2018). User manual for HYPOSAT 6 and HYPOMOD 2. NMSOP-3, PD 11.1
 
 Schweitzer, J. (2025). Travel-time corrections for seismic event locations. J. Geol. Soc. India (J-GSI), 101, 754-758. doi: 10.17491/jgsi/2025/0120040017.
 
-Schweitzer, J. (2025). HYPOSAT 6.2 and HYPOMOD 2.2 - The User Manual. 60 pp., NORSAR, doi: 10.21348/p.2025.0001.
+Schweitzer, J. (2026). HYPOSAT 6.3 and HYPOMOD 2.2 - The User Manual. 60 pp., NORSAR, doi: 10.21348/p.2026.0005.
 
 
 ## Inherited source codes
@@ -50,7 +50,8 @@ To build HYPOSAT / HYPOMOD, you need:
 
 - A working Fortran compiler (for example gfortran or Intel OneAPI)
 - A working C/C++ compiler
-- CMake. Required for Windows, optional for Linux. There is also a standard Makefile setup for Linux. Tested for  Rocky 9 & CentOS 7. May require modifications for other Linux systems
+- CMake. Required for Windows, optional for Linux. 
+- For Linux is also a standard Makefile setup for Linux. Just execute the script run_make in the directory msrc. Tested for  Rocky 9 & CentOS 7. May require modifications for other Linux systems
 - A build system generator: For example ninja (See https://ninja-build.org) or make
 
 The Program has been tested on Windows 10 and Windows 11 with Visual Studio 2022 and Intel OneAPI, and on Linux RHEL 7 and RHEL 9 with gcc and gfortran compilers.
@@ -93,3 +94,10 @@ cmake --build . --target install
 
 cmake --build . --target package
 
+### Program version
+
+When executing hyposat or hypomod with the command line extension '-v' the programs just write version number and build date to standard out and stopping each further execution.
+
+hyposat -v
+
+hypomod -v

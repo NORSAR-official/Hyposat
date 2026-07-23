@@ -18,10 +18,10 @@ c
 
       character  version*25, VDATE*20, cprog*50
       parameter (version='HYPOSAT Version 6.3a    ' )
-      parameter ( vdate=' ( 8 July 2026)' )
+      parameter ( vdate=' ( 23 July 2026)' )
 
 c
-c     last changes: 8 July 2026
+c     last changes: 23 July 2026
 c
 c----------------------------------------------------------------------
 c
@@ -9417,7 +9417,7 @@ c       write(12,'(a)') cdum
               do 4511 im = 1,nstat
                  if(stams(im).gt.-9.9d0) then
                     imsm = imsm + 1
-                    smagn(im) = stams(im)
+                    smagn(imsm) = stams(im)
                  endif
 4511          continue
            else

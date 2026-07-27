@@ -3348,8 +3348,9 @@ c
             if(istatp.eq.0 .and. phase(i)(1:1).eq.'P' .and.
      +         touse(i)(1:1).ne.' ') istatp = i
 
-            if(rparp.le.0.d0 .and. istatp.gt.0 .and. p(istatp).gt.0.d0) 
-     +         rparp = p(istatp)
+            if(rparp.le.0.d0 .and. istatp.gt.0) then
+               if(p(istatp).gt.0.d0) rparp = p(istatp)
+            endif
 
             if(istats.eq.0 .and. phase_type(phase(i)).eq.'S' .and.
      +         touse(i)(1:1).ne.' ') istats = i
@@ -3357,8 +3358,9 @@ c
             if(istats.eq.0 .and. phase(i).eq.'Rg' .and.
      +         touse(i)(1:1).ne.' ') istats = i
 
-            if(rpars.le.0.d0 .and. istats.gt.0 .and. p(istats).gt.0.d0) 
-     +         rpars = p(istats)
+            if(rpars.le.0.d0 .and. istats.gt.0) then
+               if(p(istats).gt.0.d0) rpars = p(istats)
+            endif
 
 17       continue
 

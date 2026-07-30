@@ -2,7 +2,7 @@
 
 ## DIRECTORY Hyposat-main. 
 
-HYPOSAT version 6.3a and HYPOMOD version 2.3 main directory with following contents
+HYPOSAT version 6.3a1 and HYPOMOD version 2.3 main directory with following contents
 
 
 ### Subdirectory ./bin/

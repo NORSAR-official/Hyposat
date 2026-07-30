@@ -11,17 +11,17 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOSAT_6_3a
+      program HYPOSAT_6_3a1
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
       character  version*25, VDATE*20, cprog*50
-      parameter (version='HYPOSAT Version 6.3a    ' )
-      parameter ( vdate=' ( 23 July 2026)' )
+      parameter (version='HYPOSAT Version 6.3a1   ' )
+      parameter ( vdate=' ( 27 July 2026)' )
 
 c
-c     last changes: 23 July 2026
+c     last changes: 27 July 2026
 c
 c----------------------------------------------------------------------
 c
@@ -10344,5 +10344,5 @@ c     print *,'czo ',czo,' iterz ',iterz,' zoflag ',zoflag, idepm,zo
 99999 continue
       stop
 
-c     end program HYPOSAT_6_3
+c     end program HYPOSAT_6_3a1
       end 

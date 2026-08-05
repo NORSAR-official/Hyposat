@@ -370,7 +370,8 @@ c
       subroutine testphase (phid0,icha,dis)
       real*8 dis
       integer icha
-      character phid*8,phid0*8,s*1, phidd*8, phase_o(20)*8
+      PARAMETER MAX_ICHA=50
+      character phid*8,phid0*8,s*1, phidd*8, phase_o(MAX_ICHA)*8
       logical flags
 
       save phase_o
@@ -776,7 +777,7 @@ c
       else
          phid0 = phid
       endif
-
+      if (icha.ge.MAX_ICHA) goto 50
       do 150 j=1,icha
       if(phase_o(icha).eq.phid) go to 50
 150   continue

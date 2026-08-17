@@ -11,17 +11,17 @@ c
 c----------------------------------------------------------------------
 c
 c
-      program HYPOSAT_6_3a1
+      program HYPOSAT_6_3a2
 
       implicit real*8 (a-h,o-z)
       implicit integer (i-n)
 
       character  version*25, VDATE*20, cprog*50
-      parameter (version='HYPOSAT Version 6.3a1   ' )
-      parameter ( vdate=' ( 27 July 2026)' )
+      parameter (version='HYPOSAT Version 6.3a2   ' )
+      parameter (vdate=' ( 17 August 2026)' )
 
 c
-c     last changes: 27 July 2026
+c     last changes: 17 August 2026
 c
 c----------------------------------------------------------------------
 c
@@ -4993,6 +4993,8 @@ c         endif
   
       phid = phase(i)
 
+      icha = 0
+
       dinv(i,1) = 0.d0
       dinv(i,2) = 0.d0
       dinv(i,3) = 0.d0
@@ -5100,7 +5102,6 @@ c
 
       phid0 = phid
 
-      icha = 0
       imin = 0
       dtts = 999.d99
 
@@ -7824,6 +7825,8 @@ c
 
       do 450 i = 1,nobs
 
+      icha = 0
+
       epiaz(i) = -999.0
       epiaz2(i) = -999.0
       emeran(i) = -999.d0
@@ -8084,8 +8087,6 @@ c    +   used(i)(1:3).ne.' ') then
       nphass = nphas
       surfm = surf
 
-      icha = 0
-                
 418   continue
 
 c     print *,'---> (e-0) ',i,sta(iev(i)),
@@ -10344,5 +10345,5 @@ c     print *,'czo ',czo,' iterz ',iterz,' zoflag ',zoflag, idepm,zo
 99999 continue
       stop
 
-c     end program HYPOSAT_6_3a1
+c     end program HYPOSAT_6_3a2
       end 

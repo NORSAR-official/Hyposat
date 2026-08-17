@@ -366,12 +366,12 @@ c
 c     October 2020 & April 2021 some changes in logics
 c
 c     July 2026: new structured
-c  
+c     August 2026: phase_o bug fixed 
+c
       subroutine testphase (phid0,icha,dis)
       real*8 dis
       integer icha
-      PARAMETER MAX_ICHA=50
-      character phid*8,phid0*8,s*1, phidd*8, phase_o(MAX_ICHA)*8
+      character phid*8,phid0*8,s*1, phidd*8, phase_o(20)*8
       logical flags
 
       save phase_o
@@ -392,7 +392,7 @@ c
          phid = phidd(2:8) // ' '
       endif
 
-      if(phid(1:1).ne.'P' ) go to 20
+      if(phid(1:1).ne.'P') go to 20
 
       if(dis.gt.100.d0) then
 
@@ -586,7 +586,7 @@ c
          goto 100
       endif
 
-      go to 50
+      go to 200
 
 20    continue
 
@@ -745,7 +745,7 @@ c
          goto 100
       endif
 
-      go to 50
+      go to 200
 
 30    continue
 
@@ -767,8 +767,7 @@ c
          goto 100
       endif
 
-50    icha = 999
-      return
+      go to 200
 
 100   continue
 
@@ -777,15 +776,20 @@ c
       else
          phid0 = phid
       endif
-      if (icha.ge.MAX_ICHA) goto 50
-      do 150 j=1,icha
-      if(phase_o(icha).eq.phid) go to 50
-150   continue
 
       icha = icha + 1
       phase_o(icha) = phid
 
+      do 150 j=1,icha-1
+      if(phase_o(j).eq.phid) go to 200
+150   continue
+
       return
+
+200   icha = 999
+
+      return
+
       end
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       function phasw(phd)

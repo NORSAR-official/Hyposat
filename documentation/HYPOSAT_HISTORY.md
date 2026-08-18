@@ -532,3 +532,11 @@ e-mail: johannes.schweitzer@norsar.no
 ### Version 6.3a July 2026
 
 	Small correction for compatibility with the old syntax of hyposat-in.
+
+### Version 6.3a1 July 2026
+
+	Small potential error for Windows application corrected.
+
+### Version 6.3a2 July 2026
+
+	hyposat_phase.f corrected.

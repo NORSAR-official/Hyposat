@@ -74,7 +74,7 @@ fi
 	export DEBUG=""
 
 #	export LFLAG="-lgfortran -lm"
-#       to strip code from source inforamtion
+#       to strip code from source information
 	export LFLAG="-lgfortran -lm -s"
 
 #

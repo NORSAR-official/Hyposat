@@ -399,6 +399,7 @@ void json_end_group_(int* rc)
     if (!currentStorageHandler) {
         std::cerr << "In json_end_group_: No active event storage!\n";
         if (rc) *rc = -1;
+        return;
     }
     if (!currentStorageHandler->endGroup()) {
         std::cerr << "In json_end_group_: Failed to end group!\n";

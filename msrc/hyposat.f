@@ -2899,7 +2899,12 @@ c     print*, timeo,jdate,yy,mon,mm,dd,idoy,hh,mi,sec
       if (chgcas.eq.'A') then
          chgcas = uppcas(phidd(2:2))
          if(chgcas.eq.'M')  then
-            touse(ii) = '     M   '
+c
+c           only the magnitude flag is kept, the model index
+c           in touse(7:7) must not be destroyed!
+c
+            touse(ii)(1:6) = '     M'
+            touse(ii)(8:9) = '  '
             chgcas = uppcas(phidd(3:3))
             if(chgcas.eq.'L') phase(ii) = 'AML'
             if(chgcas.eq.'S') phase(ii) = 'AMs'

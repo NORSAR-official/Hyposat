@@ -216,6 +216,15 @@ void month_day( struct date_time *dt)
 	int i,dim,leap;
 
 	leap = ISLEAP(dt->year);
+
+	if( dt->doy < 1 || dt->doy > (leap ? 366 : 365) ){
+		/* invalid day-of-year: fail safe rather than index out of range */
+		dt->day = 0;
+		dt->month = 0;
+		dt->mname[0] = '\0';
+		return;
+	}
+
 	dt->day = dt->doy;
 	for( i = 0 ; i < 12 ; i ++ ){
 		dim = days_in_month[i];
